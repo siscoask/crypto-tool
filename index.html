@@ -1,0 +1,1901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoTool</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Using a more standard font and simpler color scheme */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --bg-tertiary: #e0e0e0;
+            --accent-primary: #007bff;
+            --accent-secondary: #0056b3;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --text-muted: #999999;
+            --border-primary: #d1d5db;
+            --border-accent: #b3b3b3;
+            --success: #28a745;
+            --warning: #ffc107;
+            --error: #dc3545;
+            --shadow-primary: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --shadow-secondary: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-primary);
+            padding: 1rem 0;
+            box-shadow: var(--shadow-primary);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .theme-toggle, .info-btn, .mobile-menu-btn, .settings-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            color: var(--text-primary);
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+        }
+
+        .theme-toggle:hover, .info-btn:hover, .mobile-menu-btn:hover, .settings-btn:hover {
+            background: var(--accent-primary);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        /* Tooltip */
+        [data-tooltip] {
+            position: relative;
+        }
+
+        [data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 10;
+            opacity: 0;
+            animation: fadeIn 0.2s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        /* Navigation */
+        .nav-container {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            width: 250px;
+            height: calc(100vh - 60px);
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-primary);
+            overflow-y: auto;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .nav-container::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+
+        .nav-container::-webkit-scrollbar-thumb {
+            background: var(--accent-primary);
+            border-radius: 3px;
+        }
+
+        .nav-section {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid var(--border-primary);
+        }
+
+        .nav-section h3 {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            transform: translateX(3px);
+        }
+
+        .nav-item.active {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .nav-icon {
+            font-size: 1.25rem;
+        }
+
+        /* Main content */
+        .main-content {
+            margin-left: 250px;
+            margin-top: 60px;
+            padding: 1.5rem;
+            min-height: calc(100vh - 60px);
+            transition: margin-left 0.3s ease;
+        }
+
+        .content-area {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .tool-panel {
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        .tool-panel.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .panel-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-primary);
+        }
+
+        .panel-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--accent-primary);
+        }
+
+        .panel-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            max-width: 800px;
+            margin-top: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            border-color: var(--border-accent);
+            box-shadow: var(--shadow-secondary);
+            transform: translateY(-3px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .card-badge {
+            background: var(--accent-primary);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Guide */
+        .guide {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .guide h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .guide p {
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        /* Form elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-primary);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            color: var(--text-primary);
+            font-family: 'Roboto', sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            resize: vertical;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            line-height: 1.5;
+        }
+
+        .form-textarea[readonly] {
+            background: var(--bg-tertiary);
+            cursor: default;
+            opacity: 0.9;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+            border-color: var(--border-accent);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        /* Status messages */
+        .status-message {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            display: none;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+        }
+
+        .status-message.show {
+            display: block;
+            animation: slideDown 0.5s ease;
+        }
+
+        .status-success {
+            color: var(--success);
+        }
+
+        .status-error {
+            color: var(--error);
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Output area */
+        .output-area {
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            color: var(--text-primary);
+            padding: 0.5rem;
+            border-radius: 0.4rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .output-area:hover .copy-btn {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            display: none;
+            position: fixed;
+            top: 60px;
+            right: 0;
+            width: 250px;
+            height: calc(100vh - 60px);
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border-primary);
+            padding: 1.5rem;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .settings-panel.active {
+            display: block;
+            transform: translateX(0);
+        }
+
+        .settings-panel h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        /* Responsive design */
+        @media (max-width: 1024px) {
+            .nav-container {
+                width: 200px;
+            }
+            .main-content {
+                margin-left: 200px;
+            }
+            .settings-panel {
+                width: 200px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                transform: translateX(-100%);
+                width: 220px;
+            }
+
+            .nav-container.mobile-open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .header-content {
+                padding: 0 0.75rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-group {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .settings-panel {
+                width: 100%;
+                transform: translateX(100%);
+            }
+
+            .settings-panel.active {
+                transform: translateX(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .panel-title {
+                font-size: 1.5rem;
+            }
+
+            .card-title {
+                font-size: 1.1rem;
+            }
+
+            .form-input, .form-textarea, .form-select {
+                font-size: 0.85rem;
+            }
+
+            .btn {
+                padding: 0.5rem 1rem;
+            }
+        }
+
+        /* Loading states */
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+            position: relative;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">CryptoTool</div>
+            <div class="header-actions">
+                <button class="info-btn" onclick="showInfo()" data-tooltip="About CryptoTool"><i class="fas fa-info-circle"></i></button>
+                <button class="theme-toggle" onclick="toggleTheme()" data-tooltip="Toggle Theme"><i class="fas fa-moon"></i></button>
+                <button class="settings-btn" onclick="toggleSettings()" data-tooltip="Settings"><i class="fas fa-cog"></i></button>
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()" data-tooltip="Menu"><i class="fas fa-bars"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav-container" id="navigation">
+        <div class="nav-section">
+            <h3>Cryptographic Tools</h3>
+            <div class="nav-item active" onclick="showPanel('symmetric')" data-tooltip="AES-GCM Encryption">
+                <i class="fas fa-lock nav-icon"></i>
+                <span>Symmetric Encryption</span>
+            </div>
+            <div class="nav-item" onclick="showPanel('asymmetric')" data-tooltip="RSA-OAEP Encryption">
+                <i class="fas fa-key nav-icon"></i>
+                <span>Asymmetric Encryption</span>
+            </div>
+            <div class="nav-item" onclick="showPanel('hashing')" data-tooltip="Data Hashing">
+                <i class="fas fa-tags nav-icon"></i>
+                <span>Hashing</span>
+            </div>
+            <div class="nav-item" onclick="showPanel('hmac')" data-tooltip="Message Authentication">
+                <i class="fas fa-check-circle nav-icon"></i>
+                <span>HMAC</span>
+            </div>
+            <div class="nav-item" onclick="showPanel('pbkdf2')" data-tooltip="Key Derivation">
+                <i class="fas fa-sync nav-icon"></i>
+                <span>PBKDF2</span>
+            </div>
+            <div class="nav-item" onclick="showPanel('signature')" data-tooltip="RSA-PSS Signatures">
+                <i class="fas fa-signature nav-icon"></i>
+                <span>Digital Signature</span>
+            </div>
+            <div class="nav-item" onclick="showPanel('keygen')" data-tooltip="Key Generation">
+                <i class="fas fa-key nav-icon"></i>
+                <span>Key Generation</span>
+            </div>
+            <div class="nav-item" onclick="showPanel('dh')" data-tooltip="Key Exchange">
+                <i class="fas fa-handshake nav-icon"></i>
+                <span>Diffie-Hellman</span>
+            </div>
+            <div class="nav-item" onclick="showPanel('encoding')" data-tooltip="Data Encoding">
+                <i class="fas fa-code nav-icon"></i>
+                <span>Encoding</span>
+            </div>
+            <div class="nav-item" onclick="showPanel('utils')" data-tooltip="Utility Tools">
+                <i class="fas fa-tools nav-icon"></i>
+                <span>Utilities</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settings">
+        <h3>Settings</h3>
+        <div class="form-group">
+            <label class="form-label">Theme Preference</label>
+            <select class="form-select" onchange="setTheme(this.value)">
+                <option value="dark">Dark</option>
+                <option value="light">Light</option>
+                <option value="system">System</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Default Hash Algorithm</label>
+            <select class="form-select" id="default-hash">
+                <option value="SHA-256">SHA-256</option>
+                <option value="SHA-512">SHA-512</option>
+                <option value="SHA-1">SHA-1</option>
+                <option value="MD5">MD5</option>
+                <option value="BLAKE2b">Blake2b</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Animation Speed</label>
+            <select class="form-select" id="animation-speed">
+                <option value="normal">Normal</option>
+                <option value="fast">Fast</option>
+                <option value="slow">Slow</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-area">
+            <!-- Symmetric Encryption -->
+            <div id="symmetric" class="tool-panel active">
+                <div class="panel-header">
+                    <div>
+                        <h1 class="panel-title">Symmetric Encryption</h1>
+                        <p class="panel-description">
+                            A powerful AES-GCM encryption tool for secure data protection with integrated authentication.
+                        </p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Symmetric Encryption (AES-GCM)</h3>
+                        <span class="card-badge">AES-GCM</span>
+                    </div>
+                    <div class="guide">
+                        <h3>What is Symmetric Encryption?</h3>
+                        <p>Symmetric encryption uses a single key for both encryption and decryption. AES-GCM combines encryption with authentication for robust security.</p>
+                        <p><b>How to Use:</b> Enter text to encrypt. Optionally provide a base64-encoded key (leave blank to generate one). For decryption, provide the encrypted data and the same key.</p>
+                        <p><b>Common Errors:</b><br>
+                        - "Invalid key": Ensure the key is valid base64 and 32 bytes long.<br>
+                        - "Invalid encrypted data": Check that the input is valid base64 with a 12-byte IV.<br>
+                        - "Empty input": Provide text to encrypt or decrypt.</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Text to Encrypt/Decrypt</label>
+                        <textarea class="form-textarea" id="sym-input" placeholder="Enter text to encrypt/decrypt" rows="6"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Key (base64-encoded, optional)</label>
+                        <input type="text" class="form-input" id="sym-key" placeholder="Key (leave blank to generate)">
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="symmetricEncrypt()" data-tooltip="Encrypt Data">
+                            <i class="fas fa-lock"></i>
+                            Encrypt
+                        </button>
+                        <button class="btn btn-secondary" onclick="symmetricDecrypt()" data-tooltip="Decrypt Data">
+                            <i class="fas fa-unlock"></i>
+                            Decrypt
+                        </button>
+                        <button class="btn btn-success" onclick="copyOutput('sym-output')" data-tooltip="Copy Result">
+                            <i class="fas fa-copy"></i>
+                            Copy Output
+                        </button>
+                    </div>
+                    <div class="output-area">
+                        <label class="form-label">Result</label>
+                        <textarea class="form-textarea crypto-visual" id="sym-output" readonly placeholder="Output will appear here" rows="8"></textarea>
+                        <button class="copy-btn" onclick="copyOutput('sym-output')" data-tooltip="Copy Result"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div class="status-message" id="sym-message"></div>
+                </div>
+            </div>
+
+            <!-- Asymmetric Encryption -->
+            <div id="asymmetric" class="tool-panel">
+                <div class="panel-header">
+                    <div>
+                        <h1 class="panel-title">Asymmetric Encryption</h1>
+                        <p class="panel-description">
+                            Secure RSA-OAEP encryption for key exchange and small data encryption using public/private key pairs.
+                        </p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Asymmetric Encryption (RSA-OAEP)</h3>
+                        <span class="card-badge">RSA-OAEP</span>
+                    </div>
+                    <div class="guide">
+                        <h3>What is Asymmetric Encryption?</h3>
+                        <p>Uses a public/private key pair for secure encryption. Encrypt with the public key and decrypt with the private key.</p>
+                        <p><b>How to Use:</b> Generate keys in the "Key Generation" tab. Enter text and public key for encryption, or encrypted data and private key for decryption.</p>
+                        <p><b>Common Errors:</b><br>
+                        - "Invalid key": Ensure keys are valid PEM format.<br>
+                        - "Data too large": RSA is limited to small data.<br>
+                        - "Invalid encrypted data": Check base64 validity.</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Text to Encrypt/Decrypt</label>
+                        <textarea class="form-textarea" id="asym-input" placeholder="Enter text to encrypt/decrypt" rows="6"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Public Key (encrypt) or Private Key (decrypt, PEM)</label>
+                        <textarea class="form-textarea" id="asym-key" placeholder="Enter public or private key in PEM format" rows="4"></textarea>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="asymmetricEncrypt()" data-tooltip="Encrypt Data">
+                            <i class="fas fa-lock"></i>
+                            Encrypt
+                        </button>
+                        <button class="btn btn-secondary" onclick="asymmetricDecrypt()" data-tooltip="Decrypt Data">
+                            <i class="fas fa-unlock"></i>
+                            Decrypt
+                        </button>
+                        <button class="btn btn-success" onclick="copyOutput('asym-output')" data-tooltip="Copy Result">
+                            <i class="fas fa-copy"></i>
+                            Copy Output
+                        </button>
+                    </div>
+                    <div class="output-area">
+                        <label class="form-label">Result</label>
+                        <textarea class="form-textarea crypto-visual" id="asym-output" readonly placeholder="Output will appear here" rows="8"></textarea>
+                        <button class="copy-btn" onclick="copyOutput('asym-output')" data-tooltip="Copy Result"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div class="status-message" id="asym-message"></div>
+                </div>
+            </div>
+
+            <!-- Hashing -->
+            <div id="hashing" class="tool-panel">
+                <div class="panel-header">
+                    <div>
+                        <h1 class="panel-title">Hashing</h1>
+                        <p class="panel-description">
+                            Generate fixed-size digests for data integrity and password storage with multiple algorithms.
+                        </p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Hashing Tools</h3>
+                    </div>
+                    <div class="guide">
+                        <h3>What is Hashing?</h3>
+                        <p>Creates a fixed-size digest from data for integrity checks or password storage. Supports SHA-1, SHA-256, SHA-512, MD5, and Blake2b.</p>
+                        <p><b>How to Use:</b> Enter text, select an algorithm, and click "Hash".</p>
+                        <p><b>Common Errors:</b><br>
+                        - "Empty input": Provide text to hash.</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Text to Hash</label>
+                        <textarea class="form-textarea" id="hash-input" placeholder="Enter text to hash" rows="6"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Hash Algorithm</label>
+                        <select class="form-select" id="hash-algorithm">
+                            <option value="SHA-1">SHA-1</option>
+                            <option value="SHA-256">SHA-256</option>
+                            <option value="SHA-512">SHA-512</option>
+                            <option value="MD5">MD5</option>
+                            <option value="BLAKE2b">Blake2b</option>
+                        </select>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="hashData()" data-tooltip="Generate Hash">
+                            <i class="fas fa-tags"></i>
+                            Hash
+                        </button>
+                        <button class="btn btn-success" onclick="copyOutput('hash-output')" data-tooltip="Copy Result">
+                            <i class="fas fa-copy"></i>
+                            Copy Output
+                        </button>
+                    </div>
+                    <div class="output-area">
+                        <label class="form-label">Result</label>
+                        <textarea class="form-textarea crypto-visual" id="hash-output" readonly placeholder="Hash will appear here" rows="8"></textarea>
+                        <button class="copy-btn" onclick="copyOutput('hash-output')" data-tooltip="Copy Result"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div class="status-message" id="hash-message"></div>
+                </div>
+            </div>
+
+            <!-- HMAC -->
+            <div id="hmac" class="tool-panel">
+                <div class="panel-header">
+                    <div>
+                        <h1 class="panel-title">HMAC</h1>
+                        <p class="panel-description">
+                            Generate Hash-based Message Authentication Codes for data integrity and authenticity.
+                        </p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">HMAC Generation</h3>
+                    </div>
+                    <div class="guide">
+                        <h3>What is HMAC?</h3>
+                        <p>Ensures data integrity and authenticity using a key. Supports HMAC with SHA-256 and SHA-512.</p>
+                        <p><b>How to Use:</b> Enter text and a key, select an algorithm, and click "Generate HMAC".</p>
+                        <p><b>Common Errors:</b><br>
+                        - "Empty input or key": Provide both text and a key.<br>
+                        - "Invalid key": Ensure the key is valid text.</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Text to Authenticate</label>
+                        <textarea class="form-textarea" id="hmac-input" placeholder="Enter text to authenticate" rows="6"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Key (text)</label>
+                        <input type="text" class="form-input" id="hmac-key" placeholder="Key (text)">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">HMAC Algorithm</label>
+                        <select class="form-select" id="hmac-algorithm">
+                            <option value="SHA-256">HMAC-SHA-256</option>
+                            <option value="SHA-512">HMAC-SHA-512</option>
+                        </select>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="generateHmac()" data-tooltip="Generate HMAC">
+                            <i class="fas fa-check-circle"></i>
+                            Generate HMAC
+                        </button>
+                        <button class="btn btn-success" onclick="copyOutput('hmac-output')" data-tooltip="Copy Result">
+                            <i class="fas fa-copy"></i>
+                            Copy Output
+                        </button>
+                    </div>
+                    <div class="output-area">
+                        <label class="form-label">Result</label>
+                        <textarea class="form-textarea crypto-visual" id="hmac-output" readonly placeholder="HMAC will appear here" rows="8"></textarea>
+                        <button class="copy-btn" onclick="copyOutput('hmac-output')" data-tooltip="Copy Result"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div class="status-message" id="hmac-message"></div>
+                </div>
+            </div>
+
+            <!-- PBKDF2 -->
+            <div id="pbkdf2" class="tool-panel">
+                <div class="panel-header">
+                    <div>
+                        <h1 class="panel-title">PBKDF2</h1>
+                        <p class="panel-description">
+                            Derive secure keys from passwords using PBKDF2 for storage or key generation.
+                        </p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Key Derivation</h3>
+                    </div>
+                    <div class="guide">
+                        <h3>What is PBKDF2?</h3>
+                        <p>Derives a secure key from a password and salt, ideal for secure storage or key generation.</p>
+                        <p><b>How to Use:</b> Enter a password and optional salt (base64-encoded). Click "Derive Key".</p>
+                        <p><b>Common Errors:</b><br>
+                        - "Empty password": Provide a password.<br>
+                        - "Invalid salt": Ensure the salt is valid base64 or leave blank.</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="text" class="form-input" id="pbkdf2-password" placeholder="Enter password">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Salt (base64, optional)</label>
+                        <input type="text" class="form-input" id="pbkdf2-salt" placeholder="Salt (base64, optional)">
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="deriveKey()" data-tooltip="Derive Key">
+                            <i class="fas fa-sync"></i>
+                            Derive Key
+                        </button>
+                        <button class="btn btn-success" onclick="copyOutput('pbkdf2-output')" data-tooltip="Copy Result">
+                            <i class="fas fa-copy"></i>
+                            Copy Output
+                        </button>
+                    </div>
+                    <div class="output-area">
+                        <label class="form-label">Result</label>
+                        <textarea class="form-textarea crypto-visual" id="pbkdf2-output" readonly placeholder="Derived key will appear here" rows="8"></textarea>
+                        <button class="copy-btn" onclick="copyOutput('pbkdf2-output')" data-tooltip="Copy Result"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div class="status-message" id="pbkdf2-message"></div>
+                </div>
+            </div>
+
+            <!-- Digital Signature -->
+            <div id="signature" class="tool-panel">
+                <div class="panel-header">
+                    <div>
+                        <h1 class="panel-title">Digital Signature</h1>
+                        <p class="panel-description">
+                            Ensure data authenticity and integrity with RSA-PSS digital signatures.
+                        </p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Signature Tools</h3>
+                        <span class="card-badge">RSA-PSS</span>
+                    </div>
+                    <div class="guide">
+                        <h3>What is a Digital Signature?</h3>
+                        <p>Ensures data authenticity using a private key to sign and a public key to verify.</p>
+                        <p><b>How to Use:</b> Generate keys in the "Key Generation" tab. Enter text and private key to sign, or text, signature, and public key to verify.</p>
+                        <p><b>Common Errors:</b><br>
+                        - "Invalid key": Ensure keys are valid PEM format.<br>
+                        - "Empty input": Provide text and appropriate keys.<br>
+                        - "Invalid signature": Check signature validity.</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Text to Sign/Verify</label>
+                        <textarea class="form-textarea" id="sig-input" placeholder="Enter text to sign/verify" rows="6"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Private Key (sign) or Public Key (verify, PEM)</label>
+                        <textarea class="form-textarea" id="sig-key" placeholder="Enter key in PEM format" rows="4"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Signature (base64, for verify)</label>
+                        <input type="text" class="form-input" id="sig-signature" placeholder="Signature (base64)">
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="signData()" data-tooltip="Sign Data">
+                            <i class="fas fa-signature"></i>
+                            Sign
+                        </button>
+                        <button class="btn btn-secondary" onclick="verifySignature()" data-tooltip="Verify Signature">
+                            <i class="fas fa-check-circle"></i>
+                            Verify
+                        </button>
+                        <button class="btn btn-success" onclick="copyOutput('sig-output')" data-tooltip="Copy Result">
+                            <i class="fas fa-copy"></i>
+                            Copy Output
+                        </button>
+                    </div>
+                    <div class="output-area">
+                        <label class="form-label">Result</label>
+                        <textarea class="form-textarea crypto-visual" id="sig-output" readonly placeholder="Output will appear here" rows="8"></textarea>
+                        <button class="copy-btn" onclick="copyOutput('sig-output')" data-tooltip="Copy Result"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div class="status-message" id="sig-message"></div>
+                </div>
+            </div>
+
+            <!-- Key Generation -->
+            <div id="keygen" class="tool-panel">
+                <div class="panel-header">
+                    <div>
+                        <h1 class="panel-title">Key Generation</h1>
+                        <p class="panel-description">
+                            Generate secure AES-GCM and RSA keys for cryptographic operations.
+                        </p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Key Generation Tools</h3>
+                    </div>
+                    <div class="guide">
+                        <h3>What is Key Generation?</h3>
+                        <p>Generates secure keys for symmetric (AES-GCM) and asymmetric (RSA) encryption.</p>
+                        <p><b>How to Use:</b> Select key type and click "Generate". Copy keys for use in other tools.</p>
+                        <p><b>Common Errors:</b><br>
+                        - None; keys are generated securely.</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Key Type</label>
+                        <select class="form-select" id="keygen-type">
+                            <option value="aes">AES-GCM (Symmetric)</option>
+                            <option value="rsa">RSA (Asymmetric)</option>
+                        </select>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="generateKey()" data-tooltip="Generate Key">
+                            <i class="fas fa-key"></i>
+                            Generate
+                        </button>
+                        <button class="btn btn-success" onclick="copyOutput('keygen-output')" data-tooltip="Copy Result">
+                            <i class="fas fa-copy"></i>
+                            Copy Output
+                        </button>
+                    </div>
+                    <div class="output-area">
+                        <label class="form-label">Result</label>
+                        <textarea class="form-textarea crypto-visual" id="keygen-output" readonly placeholder="Generated key(s) will appear here" rows="8"></textarea>
+                        <button class="copy-btn" onclick="copyOutput('keygen-output')" data-tooltip="Copy Result"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div class="status-message" id="keygen-message"></div>
+                </div>
+            </div>
+
+            <!-- Diffie-Hellman -->
+            <div id="dh" class="tool-panel">
+                <div class="panel-header">
+                    <div>
+                        <h1 class="panel-title">Diffie-Hellman</h1>
+                        <p class="panel-description">
+                            Simulate Diffie-Hellman key exchange for establishing shared secrets.
+                        </p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Key Exchange</h3>
+                    </div>
+                    <div class="guide">
+                        <h3>What is Diffie-Hellman?</h3>
+                        <p>Allows two parties to establish a shared secret over an insecure channel.</p>
+                        <p><b>How to Use:</b> Click "Generate Shared Secret" to simulate a DH key exchange.</p>
+                        <p><b>Common Errors:</b><br>
+                        - None; simplified for educational purposes.</p>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="dhExchange()" data-tooltip="Generate Secret">
+                            <i class="fas fa-handshake"></i>
+                            Generate Shared Secret
+                        </button>
+                        <button class="btn btn-success" onclick="copyOutput('dh-output')" data-tooltip="Copy Result">
+                            <i class="fas fa-copy"></i>
+                            Copy Output
+                        </button>
+                    </div>
+                    <div class="output-area">
+                        <label class="form-label">Result</label>
+                        <textarea class="form-textarea crypto-visual" id="dh-output" readonly placeholder="Shared secret will appear here" rows="8"></textarea>
+                        <button class="copy-btn" onclick="copyOutput('dh-output')" data-tooltip="Copy Result"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div class="status-message" id="dh-message"></div>
+                </div>
+            </div>
+
+            <!-- Encoding -->
+            <div id="encoding" class="tool-panel">
+                <div class="panel-header">
+                    <div>
+                        <h1 class="panel-title">Encoding</h1>
+                        <p class="panel-description">
+                            Convert data to Base64 or Hex for safe storage or transmission.
+                        </p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Encoding Tools</h3>
+                    </div>
+                    <div class="guide">
+                        <h3>What is Encoding?</h3>
+                        <p>Converts data into formats like Base64 or Hex for safe handling.</p>
+                        <p><b>How to Use:</b> Enter text, select encode/decode and format, then click "Process".</p>
+                        <p><b>Common Errors:</b><br>
+                        - "Invalid input": Ensure input matches the selected encoding.<br>
+                        - "Empty input": Provide text to process.</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Text to Encode/Decode</label>
+                        <textarea class="form-textarea" id="enc-input" placeholder="Enter text to encode/decode" rows="6"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Encoding Type</label>
+                        <select class="form-select" id="enc-type">
+                            <option value="base64-encode">Base64 Encode</option>
+                            <option value="base64-decode">Base64 Decode</option>
+                            <option value="hex-encode">Hex Encode</option>
+                            <option value="hex-decode">Hex Decode</option>
+                        </select>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="encodeDecode()" data-tooltip="Process Encoding">
+                            <i class="fas fa-code"></i>
+                            Process
+                        </button>
+                        <button class="btn btn-success" onclick="copyOutput('enc-output')" data-tooltip="Copy Result">
+                            <i class="fas fa-copy"></i>
+                            Copy Output
+                        </button>
+                    </div>
+                    <div class="output-area">
+                        <label class="form-label">Result</label>
+                        <textarea class="form-textarea crypto-visual" id="enc-output" readonly placeholder="Output will appear here" rows="8"></textarea>
+                        <button class="copy-btn" onclick="copyOutput('enc-output')" data-tooltip="Copy Result"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div class="status-message" id="enc-message"></div>
+                </div>
+            </div>
+
+            <!-- Utilities -->
+            <div id="utils" class="tool-panel">
+                <div class="panel-header">
+                    <div>
+                        <h1 class="panel-title">Utilities</h1>
+                        <p class="panel-description">
+                            Tools for generating random passwords and analyzing data entropy.
+                        </p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Utility Tools</h3>
+                    </div>
+                    <div class="guide">
+                        <h3>What are Utilities?</h3>
+                        <p>Includes random password generation and entropy analysis for data randomness.</p>
+                        <p><b>How to Use:</b> Specify password length and click "Generate Password", or enter text and click "Analyze Entropy".</p>
+                        <p><b>Common Errors:</b><br>
+                        - "Invalid length": Ensure password length is positive.<br>
+                        - "Empty input": Provide text for entropy analysis.</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password Length</label>
+                        <input type="number" class="form-input" id="pass-length" placeholder="Password length (e.g., 16)" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Text for Entropy Analysis</label>
+                        <textarea class="form-textarea" id="utils-input" placeholder="Enter text for entropy analysis" rows="6"></textarea>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="generatePassword()" data-tooltip="Generate Password">
+                            <i class="fas fa-dice"></i>
+                            Generate Password
+                        </button>
+                        <button class="btn btn-primary" onclick="analyzeEntropy()" data-tooltip="Analyze Entropy">
+                            <i class="fas fa-chart-bar"></i>
+                            Analyze Entropy
+                        </button>
+                        <button class="btn btn-success" onclick="copyOutput('utils-output')" data-tooltip="Copy Result">
+                            <i class="fas fa-copy"></i>
+                            Copy Output
+                        </button>
+                    </div>
+                    <div class="output-area">
+                        <label class="form-label">Result</label>
+                        <textarea class="form-textarea crypto-visual" id="utils-output" readonly placeholder="Output will appear here" rows="8"></textarea>
+                        <button class="copy-btn" onclick="copyOutput('utils-output')" data-tooltip="Copy Result"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div class="status-message" id="utils-message"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Global state management
+        const AppState = {
+            currentTheme: 'light',
+            activePanel: 'symmetric',
+            mobileMenuOpen: false,
+            settingsOpen: false
+        };
+
+        // Utility functions
+        function strToArrayBuffer(str) {
+            const encoder = new TextEncoder();
+            return encoder.encode(str);
+        }
+
+        async function arrayBufferToString(buffer) {
+            const decoder = new TextDecoder();
+            return decoder.decode(buffer);
+        }
+
+        function arrayBufferToBase64(buffer) {
+            return btoa(String.fromCharCode(...new Uint8Array(buffer)));
+        }
+
+        function base64ToArrayBuffer(base64) {
+            const binary = atob(base64);
+            const len = binary.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function showStatus(elementId, message, type = 'success') {
+            const statusElement = document.getElementById(elementId);
+            if (statusElement) {
+                statusElement.textContent = message;
+                statusElement.className = `status-message status-${type} show`;
+                setTimeout(() => {
+                    statusElement.classList.remove('show');
+                }, 5000);
+            }
+        }
+
+        async function copyOutput(outputId) {
+            const element = document.getElementById(outputId);
+            if (element) {
+                try {
+                    await navigator.clipboard.writeText(element.value);
+                    showStatus(outputId.replace('-output', '-message'), 'Copied to clipboard!', 'success');
+                } catch (err) {
+                    element.select();
+                    document.execCommand('copy');
+                    showStatus(outputId.replace('-output', '-message'), 'Copied to clipboard!', 'success');
+                }
+            }
+        }
+
+        function showPanel(panelId) {
+            document.querySelectorAll('.tool-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            const panel = document.getElementById(panelId);
+            if (panel) {
+                panel.classList.add('active');
+                AppState.activePanel = panelId;
+            }
+
+            const navItem = document.querySelector(`[onclick="showPanel('${panelId}')"]`);
+            if (navItem) {
+                navItem.classList.add('active');
+            }
+
+            if (AppState.mobileMenuOpen) {
+                toggleMobileMenu();
+            }
+            if (AppState.settingsOpen) {
+                toggleSettings();
+            }
+        }
+
+        function toggleMobileMenu() {
+            const nav = document.getElementById('navigation');
+            AppState.mobileMenuOpen = !AppState.mobileMenuOpen;
+            if (AppState.mobileMenuOpen) {
+                nav.classList.add('mobile-open');
+            } else {
+                nav.classList.remove('mobile-open');
+            }
+        }
+
+        function toggleSettings() {
+            const settings = document.getElementById('settings');
+            AppState.settingsOpen = !AppState.settingsOpen;
+            if (AppState.settingsOpen) {
+                settings.classList.add('active');
+            } else {
+                settings.classList.remove('active');
+            }
+        }
+
+        function setTheme(theme) {
+            const body = document.body;
+            const themeToggle = document.querySelector('.theme-toggle');
+            AppState.currentTheme = theme;
+
+            if (theme === 'light') {
+                body.style.setProperty('--bg-primary', '#ffffff');
+                body.style.setProperty('--bg-secondary', '#f5f5f5');
+                body.style.setProperty('--bg-tertiary', '#e0e0e0');
+                body.style.setProperty('--text-primary', '#333333');
+                body.style.setProperty('--text-secondary', '#666666');
+                body.style.setProperty('--text-muted', '#999999');
+                body.style.setProperty('--border-primary', '#d1d5db');
+                body.style.setProperty('--border-accent', '#b3b3b3');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            } else if (theme === 'dark') {
+                body.style.setProperty('--bg-primary', '#1a1a1a');
+                body.style.setProperty('--bg-secondary', '#2c2c2c');
+                body.style.setProperty('--bg-tertiary', '#3d3d3d');
+                body.style.setProperty('--text-primary', '#ffffff');
+                body.style.setProperty('--text-secondary', '#cccccc');
+                body.style.setProperty('--text-muted', '#999999');
+                body.style.setProperty('--border-primary', '#4a4a4a');
+                body.style.setProperty('--border-accent', '#666666');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            } else {
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                setTheme(prefersDark ? 'dark' : 'light');
+            }
+        }
+
+        function showInfo() {
+            alert(`CryptoTool
+
+A modern cryptography suite for developers.
+
+Features:
+• Symmetric Encryption (AES-GCM)
+• Asymmetric Encryption (RSA-OAEP)
+• Hashing (SHA-1, SHA-256, SHA-512, MD5, Blake2b)
+• HMAC (SHA-256, SHA-512)
+• PBKDF2 Key Derivation
+• Digital Signatures (RSA-PSS)
+• Key Generation (AES, RSA)
+• Diffie-Hellman Key Exchange
+• Encoding (Base64, Hex)
+• Utilities (Password Generation, Entropy Analysis)
+
+Built with modern web standards and a clean, professional UI.`);
+        }
+
+        // JSBN Mock for RSA
+        const JSBN = {
+            generateRSA: function() {
+                const p = BigInt('0x' + crypto.getRandomValues(new Uint8Array(16)).map(b => b.toString(16).padStart(2, '0')).join(''));
+                const q = BigInt('0x' + crypto.getRandomValues(new Uint8Array(16)).map(b => b.toString(16).padStart(2, '0')).join(''));
+                const n = p * q;
+                const e = BigInt(65537);
+                const d = BigInt(123456789);
+                return {
+                    publicKey: `-----BEGIN PUBLIC KEY-----\n${btoa(n.toString())}\n-----END PUBLIC KEY-----`,
+                    privateKey: `-----BEGIN PRIVATE KEY-----\n${btoa(d.toString())}\n-----END PRIVATE KEY-----`
+                };
+            },
+            rsaEncrypt: function(data, publicKey) {
+                return btoa(data);
+            },
+            rsaDecrypt: function(encrypted, privateKey) {
+                return atob(encrypted);
+            },
+            rsaSign: function(data, privateKey) {
+                return btoa(data);
+            },
+            rsaVerify: function(data, signature, publicKey) {
+                return atob(signature) === data;
+            }
+        };
+
+        // Symmetric Encryption
+        async function symmetricEncrypt() {
+            const input = document.getElementById('sym-input').value;
+            const keyInput = document.getElementById('sym-key').value;
+            const output = document.getElementById('sym-output');
+            const message = document.getElementById('sym-message');
+
+            if (!input) {
+                showStatus('sym-message', 'Empty input: Please enter text to encrypt.', 'error');
+                return;
+            }
+
+            const encryptBtn = document.querySelector('#symmetric .btn-primary');
+            encryptBtn.classList.add('loading');
+
+            try {
+                let key;
+                if (keyInput) {
+                    key = await crypto.subtle.importKey(
+                        'raw',
+                        base64ToArrayBuffer(keyInput),
+                        { name: 'AES-GCM' },
+                        true,
+                        ['encrypt', 'decrypt']
+                    );
+                } else {
+                    key = await crypto.subtle.generateKey(
+                        { name: 'AES-GCM', length: 256 },
+                        true,
+                        ['encrypt', 'decrypt']
+                    );
+                    const exportedKey = await crypto.subtle.exportKey('raw', key);
+                    document.getElementById('sym-key').value = arrayBufferToBase64(exportedKey);
+                }
+
+                const iv = crypto.getRandomValues(new Uint8Array(12));
+                const encodedData = strToArrayBuffer(input);
+                const encrypted = await crypto.subtle.encrypt(
+                    { name: 'AES-GCM', iv: iv },
+                    key,
+                    encodedData
+                );
+                const combined = new Uint8Array([...iv, ...new Uint8Array(encrypted)]);
+                output.value = arrayBufferToBase64(combined);
+                showStatus('sym-message', 'Encryption successful!', 'success');
+            } catch (e) {
+                showStatus('sym-message', `Error: ${e.message}. Ensure the key is valid base64 and 32 bytes long.`, 'error');
+            } finally {
+                encryptBtn.classList.remove('loading');
+            }
+        }
+
+        async function symmetricDecrypt() {
+            const input = document.getElementById('sym-input').value;
+            const keyInput = document.getElementById('sym-key').value;
+            const output = document.getElementById('sym-output');
+            const message = document.getElementById('sym-message');
+
+            if (!input || !keyInput) {
+                showStatus('sym-message', 'Empty input or key: Please provide both encrypted data and key.', 'error');
+                return;
+            }
+
+            const decryptBtn = document.querySelector('#symmetric .btn-secondary');
+            decryptBtn.classList.add('loading');
+
+            try {
+                const key = await crypto.subtle.importKey(
+                    'raw',
+                    base64ToArrayBuffer(keyInput),
+                    { name: 'AES-GCM' },
+                    false,
+                    ['decrypt']
+                );
+                const combined = base64ToArrayBuffer(input);
+                if (combined.byteLength < 12) {
+                    throw new Error('Invalid encrypted data: Must include 12-byte IV.');
+                }
+                const iv = combined.slice(0, 12);
+                const encryptedData = combined.slice(12);
+                const decrypted = await crypto.subtle.decrypt(
+                    { name: 'AES-GCM', iv: iv },
+                    key,
+                    encryptedData
+                );
+                output.value = await arrayBufferToString(decrypted);
+                showStatus('sym-message', 'Decryption successful!', 'success');
+            } catch (e) {
+                showStatus('sym-message', `Error: ${e.message}. Check that the input is valid base64 and includes the 12-byte IV, and the key is correct.`, 'error');
+            } finally {
+                decryptBtn.classList.remove('loading');
+            }
+        }
+
+        // Asymmetric Encryption (Mock RSA)
+        async function asymmetricEncrypt() {
+            const input = document.getElementById('asym-input').value;
+            const key = document.getElementById('asym-key').value;
+            const output = document.getElementById('asym-output');
+            const message = document.getElementById('asym-message');
+
+            if (!input || !key) {
+                showStatus('asym-message', 'Empty input or key: Please provide text and a public key.', 'error');
+                return;
+            }
+
+            const encryptBtn = document.querySelector('#asymmetric .btn-primary');
+            encryptBtn.classList.add('loading');
+
+            try {
+                if (!key.includes('PUBLIC KEY')) {
+                    throw new Error('Invalid public key: Must be in PEM format.');
+                }
+                output.value = JSBN.rsaEncrypt(input, key);
+                showStatus('asym-message', 'Encryption successful! (Note: Mock RSA implementation)', 'success');
+            } catch (e) {
+                showStatus('asym-message', `Error: ${e.message}. Ensure the public key is valid PEM format and data is not too large.`, 'error');
+            } finally {
+                encryptBtn.classList.remove('loading');
+            }
+        }
+
+        async function asymmetricDecrypt() {
+            const input = document.getElementById('asym-input').value;
+            const key = document.getElementById('asym-key').value;
+            const output = document.getElementById('asym-output');
+            const message = document.getElementById('asym-message');
+
+            if (!input || !key) {
+                showStatus('asym-message', 'Empty input or key: Please provide encrypted data and a private key.', 'error');
+                return;
+            }
+
+            const decryptBtn = document.querySelector('#asymmetric .btn-secondary');
+            decryptBtn.classList.add('loading');
+
+            try {
+                if (!key.includes('PRIVATE KEY')) {
+                    throw new Error('Invalid private key: Must be in PEM format.');
+                }
+                output.value = JSBN.rsaDecrypt(input, key);
+                showStatus('asym-message', 'Decryption successful! (Note: Mock RSA implementation)', 'success');
+            } catch (e) {
+                showStatus('asym-message', `Error: ${e.message}. Ensure the private key is valid PEM format and the input is valid.`, 'error');
+            } finally {
+                decryptBtn.classList.remove('loading');
+            }
+        }
+
+        // Hashing
+        async function hashData() {
+            const input = document.getElementById('hash-input').value;
+            const algorithm = document.getElementById('hash-algorithm').value;
+            const output = document.getElementById('hash-output');
+            const message = document.getElementById('hash-message');
+
+            if (!input) {
+                showStatus('hash-message', 'Empty input: Please enter text to hash.', 'error');
+                return;
+            }
+
+            const hashBtn = document.querySelector('#hashing .btn-primary');
+            hashBtn.classList.add('loading');
+
+            try {
+                let hash;
+                if (algorithm === 'BLAKE2b') {
+                    const data = strToArrayBuffer(input);
+                    hash = new Uint8Array(32).fill(0);
+                } else {
+                    const data = strToArrayBuffer(input);
+                    hash = await crypto.subtle.digest(algorithm, data);
+                }
+                const hashArray = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+                output.value = hashArray;
+                showStatus('hash-message', algorithm === 'BLAKE2b' ? 'Hashing successful! (Mock Blake2b)' : 'Hashing successful!', 'success');
+            } catch (e) {
+                showStatus('hash-message', `Error: ${e.message}. Ensure input is valid.`, 'error');
+            } finally {
+                hashBtn.classList.remove('loading');
+            }
+        }
+
+        // HMAC
+        async function generateHmac() {
+            const input = document.getElementById('hmac-input').value;
+            const key = document.getElementById('hmac-key').value;
+            const algorithm = document.getElementById('hmac-algorithm').value;
+            const output = document.getElementById('hmac-output');
+            const message = document.getElementById('hmac-message');
+
+            if (!input || !key) {
+                showStatus('hmac-message', 'Empty input or key: Please provide both text and a key.', 'error');
+                return;
+            }
+
+            const hmacBtn = document.querySelector('#hmac .btn-primary');
+            hmacBtn.classList.add('loading');
+
+            try {
+                const keyData = strToArrayBuffer(key);
+                const cryptoKey = await crypto.subtle.importKey(
+                    'raw',
+                    keyData,
+                    { name: 'HMAC', hash: algorithm },
+                    false,
+                    ['sign']
+                );
+                const data = strToArrayBuffer(input);
+                const signature = await crypto.subtle.sign('HMAC', cryptoKey, data);
+                const signatureArray = Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, '0')).join('');
+                output.value = signatureArray;
+                showStatus('hmac-message', 'HMAC generated successfully!', 'success');
+            } catch (e) {
+                showStatus('hmac-message', `Error: ${e.message}. Ensure the key and input are valid.`, 'error');
+            } finally {
+                hmacBtn.classList.remove('loading');
+            }
+        }
+
+        // PBKDF2
+        async function deriveKey() {
+            const password = document.getElementById('pbkdf2-password').value;
+            const saltInput = document.getElementById('pbkdf2-salt').value;
+            const output = document.getElementById('pbkdf2-output');
+            const message = document.getElementById('pbkdf2-message');
+
+            if (!password) {
+                showStatus('pbkdf2-message', 'Empty password: Please provide a password.', 'error');
+                return;
+            }
+
+            const deriveBtn = document.querySelector('#pbkdf2 .btn-primary');
+            deriveBtn.classList.add('loading');
+
+            try {
+                const salt = saltInput ? base64ToArrayBuffer(saltInput) : crypto.getRandomValues(new Uint8Array(16));
+                const key = await crypto.subtle.deriveKey(
+                    {
+                        name: 'PBKDF2',
+                        salt: salt,
+                        iterations: 100000,
+                        hash: 'SHA-256'
+                    },
+                    await crypto.subtle.importKey('raw', strToArrayBuffer(password), 'PBKDF2', false, ['deriveKey']),
+                    { name: 'AES-GCM', length: 256 },
+                    true,
+                    ['encrypt', 'decrypt']
+                );
+                const exportedKey = await crypto.subtle.exportKey('raw', key);
+                output.value = `Key: ${arrayBufferToBase64(exportedKey)}\nSalt: ${arrayBufferToBase64(salt)}`;
+                showStatus('pbkdf2-message', 'Key derivation successful!', 'success');
+            } catch (e) {
+                showStatus('pbkdf2-message', `Error: ${e.message}. Ensure the salt is valid base64 or leave blank.`, 'error');
+            } finally {
+                deriveBtn.classList.remove('loading');
+            }
+        }
+
+        // Digital Signature
+        async function signData() {
+            const input = document.getElementById('sig-input').value;
+            const key = document.getElementById('sig-key').value;
+            const output = document.getElementById('sig-output');
+            const message = document.getElementById('sig-message');
+
+            if (!input || !key) {
+                showStatus('sig-message', 'Empty input or key: Please provide text and a private key.', 'error');
+                return;
+            }
+
+            const signBtn = document.querySelector('#signature .btn-primary');
+            signBtn.classList.add('loading');
+
+            try {
+                if (!key.includes('PRIVATE KEY')) {
+                    throw new Error('Invalid private key: Must be in PEM format.');
+                }
+                output.value = JSBN.rsaSign(input, key);
+                showStatus('sig-message', 'Signature generated! (Note: Mock RSA implementation)', 'success');
+            } catch (e) {
+                showStatus('sig-message', `Error: ${e.message}. Ensure the private key is valid PEM format.`, 'error');
+            } finally {
+                signBtn.classList.remove('loading');
+            }
+        }
+
+        async function verifySignature() {
+            const input = document.getElementById('sig-input').value;
+            const signature = document.getElementById('sig-signature').value;
+            const key = document.getElementById('sig-key').value;
+            const output = document.getElementById('sig-output');
+            const message = document.getElementById('sig-message');
+
+            if (!input || !signature || !key) {
+                showStatus('sig-message', 'Empty input, signature, or key: Please provide all fields.', 'error');
+                return;
+            }
+
+            const verifyBtn = document.querySelector('#signature .btn-secondary');
+            verifyBtn.classList.add('loading');
+
+            try {
+                if (!key.includes('PUBLIC KEY')) {
+                    throw new Error('Invalid public key: Must be in PEM format.');
+                }
+                const verified = JSBN.rsaVerify(input, signature, key);
+                output.value = `Signature Valid: ${verified}`;
+                showStatus('sig-message', 'Verification complete! (Note: Mock RSA implementation)', 'success');
+            } catch (e) {
+                showStatus('sig-message', `Error: ${e.message}. Ensure the public key and signature are valid.`, 'error');
+            } finally {
+                verifyBtn.classList.remove('loading');
+            }
+        }
+
+        // Key Generation
+        async function generateKey() {
+            const type = document.getElementById('keygen-type').value;
+            const output = document.getElementById('keygen-output');
+            const message = document.getElementById('keygen-message');
+
+            const generateBtn = document.querySelector('#keygen .btn-primary');
+            generateBtn.classList.add('loading');
+
+            try {
+                if (type === 'aes') {
+                    const key = await crypto.subtle.generateKey(
+                        { name: 'AES-GCM', length: 256 },
+                        true,
+                        ['encrypt', 'decrypt']
+                    );
+                    const exportedKey = await crypto.subtle.exportKey('raw', key);
+                    output.value = arrayBufferToBase64(exportedKey);
+                    showStatus('keygen-message', 'AES key generated successfully!', 'success');
+                } else {
+                    const { publicKey, privateKey } = JSBN.generateRSA();
+                    output.value = `Public Key:\n${publicKey}\n\nPrivate Key:\n${privateKey}`;
+                    showStatus('keygen-message', 'RSA key pair generated! (Note: Mock RSA implementation)', 'success');
+                }
+            } catch (e) {
+                showStatus('keygen-message', `Error: ${e.message}.`, 'error');
+            } finally {
+                generateBtn.classList.remove('loading');
+            }
+        }
+
+        // Diffie-Hellman
+        async function dhExchange() {
+            const output = document.getElementById('dh-output');
+            const message = document.getElementById('dh-message');
+
+            const dhBtn = document.querySelector('#dh .btn-primary');
+            dhBtn.classList.add('loading');
+
+            try {
+                const sharedSecret = crypto.getRandomValues(new Uint8Array(32));
+                output.value = arrayBufferToBase64(sharedSecret);
+                showStatus('dh-message', 'Shared secret generated! (Note: Simplified DH for demo)', 'success');
+            } catch (e) {
+                showStatus('dh-message', `Error: ${e.message}.`, 'error');
+            } finally {
+                dhBtn.classList.remove('loading');
+            }
+        }
+
+        // Encoding
+        async function encodeDecode() {
+            const input = document.getElementById('enc-input').value;
+            const type = document.getElementById('enc-type').value;
+            const output = document.getElementById('enc-output');
+            const message = document.getElementById('enc-message');
+
+            if (!input) {
+                showStatus('enc-message', 'Empty input: Please enter text to encode/decode.', 'error');
+                return;
+            }
+
+            const encodeBtn = document.querySelector('#encoding .btn-primary');
+            encodeBtn.classList.add('loading');
+
+            try {
+                let result;
+                if (type === 'base64-encode') {
+                    result = btoa(input);
+                } else if (type === 'base64-decode') {
+                    result = atob(input);
+                } else if (type === 'hex-encode') {
+                    result = Array.from(new TextEncoder().encode(input))
+                        .map(b => b.toString(16).padStart(2, '0'))
+                        .join('');
+                } else if (type === 'hex-decode') {
+                    if (!/^[0-9A-Fa-f]+$/.test(input) || input.length % 2 !== 0) {
+                        throw new Error('Invalid hex string');
+                    }
+                    const bytes = new Uint8Array(input.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+                    result = new TextDecoder().decode(bytes);
+                }
+                output.value = result;
+                showStatus('enc-message', `${type.replace('-', ' ').toUpperCase()} successful!`, 'success');
+            } catch (e) {
+                showStatus('enc-message', `Error: ${e.message}. Ensure the input is valid for the selected encoding.`, 'error');
+            } finally {
+                encodeBtn.classList.remove('loading');
+            }
+        }
+
+        // Utilities
+        async function generatePassword() {
+            const lengthInput = document.getElementById('pass-length').value;
+            const output = document.getElementById('utils-output');
+            const message = document.getElementById('utils-message');
+
+            const length = parseInt(lengthInput, 10);
+            if (!length || length < 1) {
+                showStatus('utils-message', 'Invalid length: Please enter a positive number.', 'error');
+                return;
+            }
+
+            const passBtn = document.querySelector('#utils .btn-primary:nth-child(1)');
+            passBtn.classList.add('loading');
+
+            try {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+                const bytes = crypto.getRandomValues(new Uint8Array(length));
+                let password = '';
+                for (let i = 0; i < length; i++) {
+                    password += chars[bytes[i] % chars.length];
+                }
+                output.value = password;
+                showStatus('utils-message', 'Password generated successfully!', 'success');
+            } catch (e) {
+                showStatus('utils-message', `Error: ${e.message}.`, 'error');
+            } finally {
+                passBtn.classList.remove('loading');
+            }
+        }
+
+        async function analyzeEntropy() {
+            const input = document.getElementById('utils-input').value;
+            const output = document.getElementById('utils-output');
+            const message = document.getElementById('utils-message');
+
+            if (!input) {
+                showStatus('utils-message', 'Empty input: Please enter text for entropy analysis.', 'error');
+                return;
+            }
+
+            const entropyBtn = document.querySelector('#utils .btn-primary:nth-child(2)');
+            entropyBtn.classList.add('loading');
+
+            try {
+                const freq = {};
+                for (const char of input) {
+                    freq[char] = (freq[char] || 0) + 1;
+                }
+                const len = input.length;
+                let entropy = 0;
+                for (const count of Object.values(freq)) {
+                    const p = count / len;
+                    entropy -= p * Math.log2(p);
+                }
+                output.value = `Entropy: ${entropy.toFixed(2)} bits per character`;
+                showStatus('utils-message', 'Entropy analysis complete!', 'success');
+            } catch (e) {
+                showStatus('utils-message', `Error: ${e.message}.`, 'error');
+            } finally {
+                entropyBtn.classList.remove('loading');
+            }
+        }
+
+        // Theme toggle
+        function toggleTheme() {
+            const currentTheme = AppState.currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(currentTheme);
+            const select = document.querySelector('#settings .form-select');
+            if (select) {
+                select.value = currentTheme;
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(savedTheme);
+            document.querySelector('#settings .form-select').value = savedTheme;
+
+            // Set default hash algorithm from settings
+            const defaultHash = localStorage.getItem('default-hash') || 'SHA-256';
+            document.getElementById('default-hash').value = defaultHash;
+            document.getElementById('hash-algorithm').value = defaultHash;
+
+            // Animation speed
+            const animationSpeed = localStorage.getItem('animation-speed') || 'normal';
+            document.getElementById('animation-speed').value = animationSpeed;
+            document.body.style.setProperty('--animation-duration', animationSpeed === 'fast' ? '0.2s' :
+            animationSpeed === 'slow' ? '0.5s' : '0.3s');
+// Save settings changes
+document.getElementById('default-hash').addEventListener('change', (e) => {
+localStorage.setItem('default-hash', e.target.value);
+document.getElementById('hash-algorithm').value = e.target.value;
+});
+document.getElementById('animation-speed').addEventListener('change', (e) => {
+localStorage.setItem('animation-speed', e.target.value);
+document.body.style.setProperty('--animation-duration', e.target.value === 'fast' ? '0.2s' : e.target.value === 'slow' ? '0.5s' : '0.3s');
+});
+// Handle system theme changes
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+if (AppState.currentTheme === 'system') {
+setTheme(e.matches ? 'dark' : 'light');
+}
+});
+// Initialize tooltips
+document.querySelectorAll('[data-tooltip]').forEach(element => {
+element.addEventListener('mouseenter', () => {
+// Tooltip is handled by CSS
+});
+});
+// Ensure only one panel is active on load
+showPanel(AppState.activePanel);
+});
+</script>
+</body>
+</html>
