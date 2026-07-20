@@ -1,1900 +1,1241 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CryptoTool</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* Using a more standard font and simpler color scheme */
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap');
-
-        :root {
-            --bg-primary: #ffffff;
-            --bg-secondary: #f5f5f5;
-            --bg-tertiary: #e0e0e0;
-            --accent-primary: #007bff;
-            --accent-secondary: #0056b3;
-            --text-primary: #333333;
-            --text-secondary: #666666;
-            --text-muted: #999999;
-            --border-primary: #d1d5db;
-            --border-accent: #b3b3b3;
-            --success: #28a745;
-            --warning: #ffc107;
-            --error: #dc3545;
-            --shadow-primary: 0 2px 4px rgba(0, 0, 0, 0.1);
-            --shadow-secondary: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* Header */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            background: var(--bg-primary);
-            border-bottom: 1px solid var(--border-primary);
-            padding: 1rem 0;
-            box-shadow: var(--shadow-primary);
-        }
-
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--accent-primary);
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .theme-toggle, .info-btn, .mobile-menu-btn, .settings-btn {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-primary);
-            color: var(--text-primary);
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 1rem;
-        }
-
-        .theme-toggle:hover, .info-btn:hover, .mobile-menu-btn:hover, .settings-btn:hover {
-            background: var(--accent-primary);
-            color: white;
-            transform: translateY(-1px);
-        }
-
-        /* Tooltip */
-        [data-tooltip] {
-            position: relative;
-        }
-
-        [data-tooltip]:hover::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            font-size: 0.75rem;
-            white-space: nowrap;
-            z-index: 10;
-            opacity: 0;
-            animation: fadeIn 0.2s ease forwards;
-        }
-
-        @keyframes fadeIn {
-            to { opacity: 1; }
-        }
-
-        /* Navigation */
-        .nav-container {
-            position: fixed;
-            top: 60px;
-            left: 0;
-            width: 250px;
-            height: calc(100vh - 60px);
-            background: var(--bg-secondary);
-            border-right: 1px solid var(--border-primary);
-            overflow-y: auto;
-            z-index: 100;
-            transition: transform 0.3s ease;
-        }
-
-        .nav-container::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .nav-container::-webkit-scrollbar-track {
-            background: var(--bg-tertiary);
-        }
-
-        .nav-container::-webkit-scrollbar-thumb {
-            background: var(--accent-primary);
-            border-radius: 3px;
-        }
-
-        .nav-section {
-            padding: 1.5rem 1rem;
-            border-bottom: 1px solid var(--border-primary);
-        }
-
-        .nav-section h3 {
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            margin-bottom: 1rem;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin-bottom: 0.25rem;
-        }
-
-        .nav-item:hover {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            transform: translateX(3px);
-        }
-
-        .nav-item.active {
-            background: var(--accent-primary);
-            color: white;
-        }
-
-        .nav-icon {
-            font-size: 1.25rem;
-        }
-
-        /* Main content */
-        .main-content {
-            margin-left: 250px;
-            margin-top: 60px;
-            padding: 1.5rem;
-            min-height: calc(100vh - 60px);
-            transition: margin-left 0.3s ease;
-        }
-
-        .content-area {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .tool-panel {
-            display: none;
-            animation: slideIn 0.5s ease;
-        }
-
-        .tool-panel.active {
-            display: block;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .panel-header {
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border-primary);
-        }
-
-        .panel-title {
-            font-size: 1.75rem;
-            font-weight: 600;
-            color: var(--accent-primary);
-        }
-
-        .panel-description {
-            color: var(--text-secondary);
-            line-height: 1.6;
-            max-width: 800px;
-            margin-top: 0.75rem;
-            font-size: 0.9rem;
-        }
-
-        /* Cards */
-        .card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-primary);
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            transition: all 0.2s ease;
-        }
-
-        .card:hover {
-            border-color: var(--border-accent);
-            box-shadow: var(--shadow-secondary);
-            transform: translateY(-3px);
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-        }
-
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-
-        .card-badge {
-            background: var(--accent-primary);
-            color: white;
-            padding: 0.4rem 0.8rem;
-            border-radius: 1rem;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        /* Guide */
-        .guide {
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-primary);
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .guide h3 {
-            font-size: 1.1rem;
-            margin-bottom: 0.75rem;
-            color: var(--text-primary);
-        }
-
-        .guide p {
-            color: var(--text-secondary);
-            line-height: 1.5;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        /* Form elements */
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            display: block;
-            font-weight: 500;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        .form-input, .form-textarea, .form-select {
-            width: 100%;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-primary);
-            border-radius: 0.5rem;
-            padding: 0.75rem;
-            color: var(--text-primary);
-            font-family: 'Roboto', sans-serif;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
-            resize: vertical;
-        }
-
-        .form-input:focus, .form-textarea:focus, .form-select:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-        }
-
-        .form-textarea {
-            min-height: 120px;
-            line-height: 1.5;
-        }
-
-        .form-textarea[readonly] {
-            background: var(--bg-tertiary);
-            cursor: default;
-            opacity: 0.9;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
-        }
-
-        /* Buttons */
-        .btn-group {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-            margin-top: 1rem;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 0.5rem;
-            font-family: 'Roboto', sans-serif;
-            font-weight: 500;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-primary {
-            background: var(--accent-primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-secondary);
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-primary);
-        }
-
-        .btn-secondary:hover {
-            background: var(--bg-secondary);
-            border-color: var(--border-accent);
-            transform: translateY(-2px);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #218838;
-            transform: translateY(-2px);
-        }
-
-        /* Status messages */
-        .status-message {
-            margin-top: 1rem;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            font-size: 0.9rem;
-            display: none;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-primary);
-        }
-
-        .status-message.show {
-            display: block;
-            animation: slideDown 0.5s ease;
-        }
-
-        .status-success {
-            color: var(--success);
-        }
-
-        .status-error {
-            color: var(--error);
-        }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Output area */
-        .output-area {
-            position: relative;
-        }
-
-        .copy-btn {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-primary);
-            color: var(--text-primary);
-            padding: 0.5rem;
-            border-radius: 0.4rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .output-area:hover .copy-btn {
-            background: var(--accent-primary);
-            color: white;
-        }
-
-        /* Settings Panel */
-        .settings-panel {
-            display: none;
-            position: fixed;
-            top: 60px;
-            right: 0;
-            width: 250px;
-            height: calc(100vh - 60px);
-            background: var(--bg-secondary);
-            border-left: 1px solid var(--border-primary);
-            padding: 1.5rem;
-            z-index: 100;
-            transition: transform 0.3s ease;
-        }
-
-        .settings-panel.active {
-            display: block;
-            transform: translateX(0);
-        }
-
-        .settings-panel h3 {
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-            color: var(--text-primary);
-        }
-
-        /* Responsive design */
-        @media (max-width: 1024px) {
-            .nav-container {
-                width: 200px;
-            }
-            .main-content {
-                margin-left: 200px;
-            }
-            .settings-panel {
-                width: 200px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .nav-container {
-                transform: translateX(-100%);
-                width: 220px;
-            }
-
-            .nav-container.mobile-open {
-                transform: translateX(0);
-            }
-
-            .main-content {
-                margin-left: 0;
-                padding: 1rem;
-            }
-
-            .header-content {
-                padding: 0 0.75rem;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .btn-group {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .mobile-menu-btn {
-                display: block;
-            }
-
-            .settings-panel {
-                width: 100%;
-                transform: translateX(100%);
-            }
-
-            .settings-panel.active {
-                transform: translateX(0);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .panel-title {
-                font-size: 1.5rem;
-            }
-
-            .card-title {
-                font-size: 1.1rem;
-            }
-
-            .form-input, .form-textarea, .form-select {
-                font-size: 0.85rem;
-            }
-
-            .btn {
-                padding: 0.5rem 1rem;
-            }
-        }
-
-        /* Loading states */
-        .loading {
-            opacity: 0.7;
-            pointer-events: none;
-            position: relative;
-        }
-
-        .loading::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 20px;
-            height: 20px;
-            border: 2px solid transparent;
-            border-top: 2px solid var(--accent-primary);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            transform: translate(-50%, -50%);
-        }
-
-        @keyframes spin {
-            to { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Cryptell — Cryptographic Workbench</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%233C6E71'/%3E%3Cpath d='M32 14c-7 0-11 4.5-11 11v6h-2a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h26a3 3 0 0 0 3-3V34a3 3 0 0 0-3-3h-2v-6c0-6.5-4-11-11-11zm0 5c4.4 0 7 2.7 7 6v6H25v-6c0-3.3 2.6-6 7-6zm0 19a3 3 0 1 1 0 6 3 3 0 0 1 0-6z' fill='%23F6F5F1'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/hash-wasm@4/dist/index.umd.min.js"></script>
+<style>
+:root{
+  --paper:#F6F5F1; --panel:#FFFFFF; --panel-2:#FBFAF7;
+  --ink:#1C2321; --ink-soft:#5B645F; --ink-faint:#8B938E;
+  --line:#DEDBD1; --line-soft:#EAE7DE;
+  --accent:#3C6E71; --accent-deep:#284B4D; --accent-soft:#E1EBEA; --accent-ink:#0F2626;
+  --warn:#A8763E; --warn-soft:#F3E6D3;
+  --danger:#A23E3E; --danger-soft:#F3DEDE;
+  --success:#4B7A51; --success-soft:#E1EDDD;
+  --mono-bg:#EFEDE5; --mono-bg-2:#E7E4D9;
+  --shadow: 0 1px 2px rgba(28,35,33,.05), 0 6px 20px rgba(28,35,33,.06);
+  --radius: 10px;
+  --font-display:'Space Grotesk', sans-serif;
+  --font-body:'Inter', sans-serif;
+  --font-mono:'JetBrains Mono', monospace;
+}
+html[data-theme="dark"]{
+  --paper:#12171A; --panel:#1A2024; --panel-2:#1E252A;
+  --ink:#E9E7DF; --ink-soft:#9CA5A0; --ink-faint:#6B746F;
+  --line:#2A3238; --line-soft:#232B30;
+  --accent:#5FA8A0; --accent-deep:#3C6E71; --accent-soft:#1D3230; --accent-ink:#CFEBE6;
+  --warn:#D9A968; --warn-soft:#3A2F1E;
+  --danger:#E08A8A; --danger-soft:#3A2323;
+  --success:#8FC496; --success-soft:#1F3222;
+  --mono-bg:#161C20; --mono-bg-2:#1C2328;
+  --shadow: 0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{margin:0}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} *{animation-duration:.001ms !important; transition-duration:.001ms !important;} }
+
+body{
+  font-family:var(--font-body);
+  background:var(--paper);
+  color:var(--ink);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{ background:var(--accent-soft); color:var(--accent-ink); }
+a{color:var(--accent-deep)}
+html[data-theme="dark"] a{color:var(--accent)}
+
+/* ---------- Header ---------- */
+.header{
+  position:fixed; top:0; left:0; right:0; z-index:1000;
+  height:60px; display:flex; align-items:center;
+  background:var(--panel); border-bottom:1px solid var(--line);
+}
+.header-inner{ width:100%; display:flex; align-items:center; justify-content:space-between; padding:0 1.25rem; }
+.brand{ display:flex; align-items:center; gap:.6rem; }
+.brand-mark{ width:30px; height:30px; border-radius:8px; background:var(--accent); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.brand-mark svg{ width:17px; height:17px; }
+.brand-text{ display:flex; flex-direction:column; line-height:1.05; }
+.brand-name{ font-family:var(--font-display); font-weight:700; font-size:1.05rem; letter-spacing:-.01em; }
+.brand-tag{ font-size:.68rem; color:var(--ink-faint); letter-spacing:.02em; }
+.header-actions{ display:flex; align-items:center; gap:.4rem; }
+.icon-btn{
+  width:36px; height:36px; border-radius:8px; border:1px solid var(--line);
+  background:var(--panel-2); color:var(--ink); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:all .15s ease; flex-shrink:0;
+}
+.icon-btn:hover{ border-color:var(--accent); color:var(--accent-deep); }
+html[data-theme="dark"] .icon-btn:hover{ color:var(--accent); }
+.icon-btn svg{ width:16px; height:16px; }
+.kbd-hint{
+  display:flex; align-items:center; gap:.35rem; padding:.4rem .65rem; border-radius:8px;
+  border:1px solid var(--line); background:var(--panel-2); color:var(--ink-soft); font-size:.78rem; cursor:pointer;
+}
+.kbd-hint kbd{ font-family:var(--font-mono); background:var(--mono-bg); border-radius:4px; padding:.1rem .4rem; font-size:.72rem; }
+.hamburger{ display:none; }
+
+/* ---------- Sidebar ---------- */
+.sidebar{
+  position:fixed; top:60px; left:0; width:242px; height:calc(100vh - 60px);
+  background:var(--panel); border-right:1px solid var(--line); overflow-y:auto; z-index:500;
+  transition:transform .25s ease;
+}
+.sidebar-group{ padding:1rem .85rem; }
+.sidebar-label{ font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-faint); font-weight:600; padding:0 .6rem; margin-bottom:.5rem; }
+.nav-item{
+  display:flex; align-items:center; gap:.65rem; padding:.6rem .65rem; border-radius:8px;
+  cursor:pointer; color:var(--ink-soft); font-size:.87rem; margin-bottom:.15rem; transition:all .12s ease;
+}
+.nav-item svg{ width:16px; height:16px; flex-shrink:0; opacity:.8; }
+.nav-item:hover{ background:var(--panel-2); color:var(--ink); }
+.nav-item.active{ background:var(--accent-soft); color:var(--accent-ink); font-weight:600; }
+html[data-theme="dark"] .nav-item.active{ color:var(--accent); }
+.nav-item.active svg{ opacity:1; }
+.nav-note{ padding:.9rem .85rem; margin:.5rem .85rem 0; border-top:1px solid var(--line-soft); font-size:.72rem; color:var(--ink-faint); line-height:1.5; }
+
+/* ---------- Main ---------- */
+.main{ margin-left:242px; margin-top:60px; padding:2rem 2.25rem 4rem; min-height:calc(100vh - 60px); transition:margin-left .25s ease; }
+.content{ max-width:1080px; margin:0 auto; }
+.panel{ display:none; animation:fadein .35s ease; }
+.panel.active{ display:block; }
+@keyframes fadein{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+
+.panel-head{ margin-bottom:1.5rem; }
+.panel-eyebrow{ display:inline-flex; align-items:center; gap:.4rem; font-size:.72rem; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--accent-deep); background:var(--accent-soft); padding:.3rem .6rem; border-radius:20px; margin-bottom:.75rem; }
+html[data-theme="dark"] .panel-eyebrow{ color:var(--accent); }
+.panel-title{ font-family:var(--font-display); font-size:1.7rem; font-weight:700; letter-spacing:-.01em; margin:0 0 .5rem; }
+.panel-desc{ color:var(--ink-soft); font-size:.92rem; line-height:1.6; max-width:640px; margin:0; }
+
+.card{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:1.5rem; margin-bottom:1.25rem; box-shadow:var(--shadow); }
+.card-row{ display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; }
+@media(max-width:900px){ .card-row{ grid-template-columns:1fr; } }
+
+.info-toggle{ display:flex; align-items:center; gap:.4rem; font-size:.8rem; color:var(--ink-soft); cursor:pointer; margin-bottom:1rem; user-select:none; }
+.info-toggle svg{ width:13px; height:13px; transition:transform .2s; }
+.info-toggle.open svg{ transform:rotate(90deg); }
+.info-box{ display:none; background:var(--panel-2); border:1px solid var(--line-soft); border-radius:8px; padding:1rem 1.1rem; margin-bottom:1.25rem; font-size:.83rem; color:var(--ink-soft); line-height:1.6; }
+.info-box.open{ display:block; }
+.info-box b{ color:var(--ink); }
+.info-box .warn-line{ color:var(--warn); }
+
+.field{ margin-bottom:1.1rem; }
+.field-label{ display:flex; align-items:center; justify-content:space-between; font-size:.82rem; font-weight:600; margin-bottom:.4rem; }
+.field-label .tag{ font-size:.68rem; font-weight:600; padding:.15rem .5rem; border-radius:20px; text-transform:uppercase; letter-spacing:.03em; }
+.tag-legacy{ background:var(--warn-soft); color:var(--warn); }
+.input, textarea.input, select.input{
+  width:100%; background:var(--panel-2); border:1px solid var(--line); border-radius:8px;
+  padding:.65rem .75rem; color:var(--ink); font-family:var(--font-body); font-size:.87rem; transition:border-color .15s;
+}
+textarea.input{ font-family:var(--font-mono); font-size:.82rem; line-height:1.55; resize:vertical; min-height:100px; }
+.input:focus, textarea.input:focus, select.input:focus{ outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft); }
+.output-field{ background:var(--mono-bg); font-family:var(--font-mono); font-size:.82rem; color:var(--ink); min-height:110px; }
+html[data-theme="dark"] .output-field{ color:var(--accent); }
+.field-hint{ font-size:.75rem; color:var(--ink-faint); margin-top:.35rem; }
+
+.btn-row{ display:flex; flex-wrap:wrap; gap:.6rem; margin-top:.25rem; }
+.btn{
+  display:inline-flex; align-items:center; gap:.45rem; padding:.6rem 1.1rem; border-radius:8px; border:1px solid transparent;
+  font-family:var(--font-body); font-weight:600; font-size:.83rem; cursor:pointer; transition:all .15s ease;
+}
+.btn svg{ width:14px; height:14px; }
+.btn-primary{ background:var(--accent); color:#fff; }
+.btn-primary:hover{ background:var(--accent-deep); transform:translateY(-1px); }
+.btn-ghost{ background:var(--panel-2); color:var(--ink); border-color:var(--line); }
+.btn-ghost:hover{ border-color:var(--accent); color:var(--accent-deep); }
+html[data-theme="dark"] .btn-ghost:hover{ color:var(--accent); }
+.btn-subtle{ background:transparent; color:var(--ink-soft); border-color:var(--line); padding:.5rem .85rem; font-size:.78rem; }
+.btn-subtle:hover{ color:var(--ink); border-color:var(--accent); }
+.btn:disabled{ opacity:.5; cursor:not-allowed; transform:none !important; }
+
+.status{ margin-top:.9rem; padding:.65rem .85rem; border-radius:8px; font-size:.8rem; display:none; align-items:flex-start; gap:.5rem; line-height:1.5; }
+.status.show{ display:flex; animation:slidein .25s ease; }
+@keyframes slidein{ from{opacity:0; transform:translateY(-4px);} to{opacity:1; transform:translateY(0);} }
+.status-success{ background:var(--success-soft); color:var(--success); }
+.status-error{ background:var(--danger-soft); color:var(--danger); }
+.status-info{ background:var(--accent-soft); color:var(--accent-deep); }
+html[data-theme="dark"] .status-info{ color:var(--accent); }
+
+.scramble{ position:relative; }
+.output-field.scrambling{ color:var(--ink-faint) !important; }
+
+/* meter */
+.meter{ height:6px; border-radius:4px; background:var(--line-soft); overflow:hidden; margin-top:.6rem; }
+.meter-fill{ height:100%; border-radius:4px; transition:width .3s ease, background .3s ease; width:0%; }
+
+/* compare result */
+.compare-result{ display:flex; align-items:center; gap:.5rem; padding:.75rem 1rem; border-radius:8px; font-weight:600; font-size:.85rem; margin-top:1rem; display:none; }
+.compare-result.show{ display:flex; }
+.compare-match{ background:var(--success-soft); color:var(--success); }
+.compare-mismatch{ background:var(--danger-soft); color:var(--danger); }
+
+/* history */
+.history-item{ display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.75rem .9rem; border:1px solid var(--line-soft); border-radius:8px; margin-bottom:.5rem; cursor:pointer; transition:border-color .15s; }
+.history-item:hover{ border-color:var(--accent); }
+.history-main{ min-width:0; }
+.history-tool{ font-size:.68rem; text-transform:uppercase; letter-spacing:.04em; color:var(--accent-deep); font-weight:700; }
+html[data-theme="dark"] .history-tool{ color:var(--accent); }
+.history-summary{ font-family:var(--font-mono); font-size:.78rem; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:420px; }
+.history-time{ font-size:.72rem; color:var(--ink-faint); flex-shrink:0; }
+.history-empty{ text-align:center; color:var(--ink-faint); font-size:.85rem; padding:2.5rem 1rem; }
+
+/* trust banner */
+.trust-banner{ display:flex; align-items:center; gap:.6rem; background:var(--panel-2); border:1px solid var(--line-soft); border-radius:8px; padding:.7rem 1rem; margin-bottom:1.5rem; font-size:.8rem; color:var(--ink-soft); }
+.trust-banner svg{ width:16px; height:16px; color:var(--accent); flex-shrink:0; }
+
+/* ---------- Command palette ---------- */
+.cmdk-overlay{ position:fixed; inset:0; background:rgba(20,26,29,.45); backdrop-filter:blur(2px); z-index:2000; display:none; align-items:flex-start; justify-content:center; padding-top:12vh; }
+.cmdk-overlay.open{ display:flex; }
+.cmdk-box{ width:100%; max-width:560px; background:var(--panel); border:1px solid var(--line); border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,.25); overflow:hidden; margin:0 1rem; }
+.cmdk-input{ width:100%; border:none; border-bottom:1px solid var(--line); padding:1rem 1.2rem; font-size:1rem; font-family:var(--font-body); background:transparent; color:var(--ink); }
+.cmdk-input:focus{ outline:none; }
+.cmdk-list{ max-height:340px; overflow-y:auto; padding:.5rem; }
+.cmdk-item{ display:flex; align-items:center; gap:.7rem; padding:.65rem .8rem; border-radius:8px; cursor:pointer; font-size:.87rem; }
+.cmdk-item svg{ width:15px; height:15px; opacity:.7; }
+.cmdk-item.selected{ background:var(--accent-soft); color:var(--accent-ink); }
+html[data-theme="dark"] .cmdk-item.selected{ color:var(--accent); }
+
+/* ---------- Modal (About) ---------- */
+.modal-overlay{ position:fixed; inset:0; background:rgba(20,26,29,.45); z-index:2000; display:none; align-items:center; justify-content:center; padding:1.5rem; }
+.modal-overlay.open{ display:flex; }
+.modal{ width:100%; max-width:460px; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:1.75rem; box-shadow:0 20px 60px rgba(0,0,0,.25); max-height:85vh; overflow-y:auto; }
+.modal h2{ font-family:var(--font-display); font-size:1.3rem; margin:0 0 .4rem; }
+.modal p{ font-size:.85rem; color:var(--ink-soft); line-height:1.6; }
+.modal-features{ list-style:none; padding:0; margin:1rem 0; display:grid; grid-template-columns:1fr 1fr; gap:.45rem .8rem; }
+.modal-features li{ font-size:.78rem; color:var(--ink-soft); display:flex; align-items:center; gap:.4rem; }
+.modal-features li::before{ content:''; width:5px; height:5px; border-radius:50%; background:var(--accent); flex-shrink:0; }
+.modal-close{ position:absolute; }
+.credit-card{ display:flex; gap:.9rem; align-items:center; margin-top:1.3rem; padding-top:1.3rem; border-top:1px solid var(--line-soft); }
+.credit-avatar{ width:48px; height:48px; border-radius:50%; border:1px solid var(--line); flex-shrink:0; }
+.credit-name{ font-weight:700; font-size:.9rem; }
+.credit-role{ font-size:.75rem; color:var(--ink-faint); margin-bottom:.35rem; }
+.credit-links{ display:flex; gap:.5rem; flex-wrap:wrap; }
+.credit-links a{ font-size:.72rem; color:var(--ink-soft); text-decoration:none; border:1px solid var(--line); padding:.2rem .55rem; border-radius:20px; transition:all .15s; }
+.credit-links a:hover{ border-color:var(--accent); color:var(--accent-deep); }
+html[data-theme="dark"] .credit-links a:hover{ color:var(--accent); }
+
+/* ---------- Footer ---------- */
+.footer{ max-width:1080px; margin:2rem auto 0; padding:1.25rem 0; border-top:1px solid var(--line-soft); display:flex; align-items:center; justify-content:space-between; font-size:.76rem; color:var(--ink-faint); flex-wrap:wrap; gap:.5rem; }
+.footer a{ color:var(--ink-faint); }
+
+/* ---------- Mobile overlay ---------- */
+.sidebar-scrim{ position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:400; display:none; }
+.sidebar-scrim.show{ display:block; }
+
+@media (max-width: 900px){
+  .sidebar{ transform:translateX(-100%); box-shadow:0 0 40px rgba(0,0,0,.15); }
+  .sidebar.open{ transform:translateX(0); }
+  .main{ margin-left:0; padding:1.5rem 1.25rem 3rem; }
+  .hamburger{ display:flex; }
+  .kbd-hint{ display:none; }
+  .brand-tag{ display:none; }
+  .modal-features{ grid-template-columns:1fr; }
+}
+@media (max-width: 520px){
+  .panel-title{ font-size:1.4rem; }
+  .btn-row{ flex-direction:column; align-items:stretch; }
+  .header-inner{ padding:0 .85rem; }
+  .card{ padding:1.1rem; }
+}
+</style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">CryptoTool</div>
-            <div class="header-actions">
-                <button class="info-btn" onclick="showInfo()" data-tooltip="About CryptoTool"><i class="fas fa-info-circle"></i></button>
-                <button class="theme-toggle" onclick="toggleTheme()" data-tooltip="Toggle Theme"><i class="fas fa-moon"></i></button>
-                <button class="settings-btn" onclick="toggleSettings()" data-tooltip="Settings"><i class="fas fa-cog"></i></button>
-                <button class="mobile-menu-btn" onclick="toggleMobileMenu()" data-tooltip="Menu"><i class="fas fa-bars"></i></button>
-            </div>
-        </div>
-    </header>
 
-    <!-- Navigation -->
-    <nav class="nav-container" id="navigation">
-        <div class="nav-section">
-            <h3>Cryptographic Tools</h3>
-            <div class="nav-item active" onclick="showPanel('symmetric')" data-tooltip="AES-GCM Encryption">
-                <i class="fas fa-lock nav-icon"></i>
-                <span>Symmetric Encryption</span>
-            </div>
-            <div class="nav-item" onclick="showPanel('asymmetric')" data-tooltip="RSA-OAEP Encryption">
-                <i class="fas fa-key nav-icon"></i>
-                <span>Asymmetric Encryption</span>
-            </div>
-            <div class="nav-item" onclick="showPanel('hashing')" data-tooltip="Data Hashing">
-                <i class="fas fa-tags nav-icon"></i>
-                <span>Hashing</span>
-            </div>
-            <div class="nav-item" onclick="showPanel('hmac')" data-tooltip="Message Authentication">
-                <i class="fas fa-check-circle nav-icon"></i>
-                <span>HMAC</span>
-            </div>
-            <div class="nav-item" onclick="showPanel('pbkdf2')" data-tooltip="Key Derivation">
-                <i class="fas fa-sync nav-icon"></i>
-                <span>PBKDF2</span>
-            </div>
-            <div class="nav-item" onclick="showPanel('signature')" data-tooltip="RSA-PSS Signatures">
-                <i class="fas fa-signature nav-icon"></i>
-                <span>Digital Signature</span>
-            </div>
-            <div class="nav-item" onclick="showPanel('keygen')" data-tooltip="Key Generation">
-                <i class="fas fa-key nav-icon"></i>
-                <span>Key Generation</span>
-            </div>
-            <div class="nav-item" onclick="showPanel('dh')" data-tooltip="Key Exchange">
-                <i class="fas fa-handshake nav-icon"></i>
-                <span>Diffie-Hellman</span>
-            </div>
-            <div class="nav-item" onclick="showPanel('encoding')" data-tooltip="Data Encoding">
-                <i class="fas fa-code nav-icon"></i>
-                <span>Encoding</span>
-            </div>
-            <div class="nav-item" onclick="showPanel('utils')" data-tooltip="Utility Tools">
-                <i class="fas fa-tools nav-icon"></i>
-                <span>Utilities</span>
-            </div>
+<!-- Header -->
+<header class="header">
+  <div class="header-inner">
+    <div style="display:flex;align-items:center;gap:.5rem;">
+      <button class="icon-btn hamburger" onclick="toggleSidebar()" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <div class="brand">
+        <div class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
         </div>
-    </nav>
-
-    <!-- Settings Panel -->
-    <div class="settings-panel" id="settings">
-        <h3>Settings</h3>
-        <div class="form-group">
-            <label class="form-label">Theme Preference</label>
-            <select class="form-select" onchange="setTheme(this.value)">
-                <option value="dark">Dark</option>
-                <option value="light">Light</option>
-                <option value="system">System</option>
-            </select>
+        <div class="brand-text">
+          <span class="brand-name">Cryptell</span>
+          <span class="brand-tag">Cryptographic workbench</span>
         </div>
-        <div class="form-group">
-            <label class="form-label">Default Hash Algorithm</label>
-            <select class="form-select" id="default-hash">
-                <option value="SHA-256">SHA-256</option>
-                <option value="SHA-512">SHA-512</option>
-                <option value="SHA-1">SHA-1</option>
-                <option value="MD5">MD5</option>
-                <option value="BLAKE2b">Blake2b</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label class="form-label">Animation Speed</label>
-            <select class="form-select" id="animation-speed">
-                <option value="normal">Normal</option>
-                <option value="fast">Fast</option>
-                <option value="slow">Slow</option>
-            </select>
-        </div>
+      </div>
     </div>
+    <div class="header-actions">
+      <div class="kbd-hint" onclick="openPalette()"><span>Jump to tool</span><kbd>&#8984;K</kbd></div>
+      <button class="icon-btn" onclick="openPalette()" aria-label="Search" style="display:none" id="mobileSearchBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      </button>
+      <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+      <button class="icon-btn" onclick="openModal('about')" aria-label="About">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="content-area">
-            <!-- Symmetric Encryption -->
-            <div id="symmetric" class="tool-panel active">
-                <div class="panel-header">
-                    <div>
-                        <h1 class="panel-title">Symmetric Encryption</h1>
-                        <p class="panel-description">
-                            A powerful AES-GCM encryption tool for secure data protection with integrated authentication.
-                        </p>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Symmetric Encryption (AES-GCM)</h3>
-                        <span class="card-badge">AES-GCM</span>
-                    </div>
-                    <div class="guide">
-                        <h3>What is Symmetric Encryption?</h3>
-                        <p>Symmetric encryption uses a single key for both encryption and decryption. AES-GCM combines encryption with authentication for robust security.</p>
-                        <p><b>How to Use:</b> Enter text to encrypt. Optionally provide a base64-encoded key (leave blank to generate one). For decryption, provide the encrypted data and the same key.</p>
-                        <p><b>Common Errors:</b><br>
-                        - "Invalid key": Ensure the key is valid base64 and 32 bytes long.<br>
-                        - "Invalid encrypted data": Check that the input is valid base64 with a 12-byte IV.<br>
-                        - "Empty input": Provide text to encrypt or decrypt.</p>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Text to Encrypt/Decrypt</label>
-                        <textarea class="form-textarea" id="sym-input" placeholder="Enter text to encrypt/decrypt" rows="6"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Key (base64-encoded, optional)</label>
-                        <input type="text" class="form-input" id="sym-key" placeholder="Key (leave blank to generate)">
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn btn-primary" onclick="symmetricEncrypt()" data-tooltip="Encrypt Data">
-                            <i class="fas fa-lock"></i>
-                            Encrypt
-                        </button>
-                        <button class="btn btn-secondary" onclick="symmetricDecrypt()" data-tooltip="Decrypt Data">
-                            <i class="fas fa-unlock"></i>
-                            Decrypt
-                        </button>
-                        <button class="btn btn-success" onclick="copyOutput('sym-output')" data-tooltip="Copy Result">
-                            <i class="fas fa-copy"></i>
-                            Copy Output
-                        </button>
-                    </div>
-                    <div class="output-area">
-                        <label class="form-label">Result</label>
-                        <textarea class="form-textarea crypto-visual" id="sym-output" readonly placeholder="Output will appear here" rows="8"></textarea>
-                        <button class="copy-btn" onclick="copyOutput('sym-output')" data-tooltip="Copy Result"><i class="fas fa-copy"></i></button>
-                    </div>
-                    <div class="status-message" id="sym-message"></div>
-                </div>
-            </div>
+<div class="sidebar-scrim" id="scrim" onclick="toggleSidebar()"></div>
 
-            <!-- Asymmetric Encryption -->
-            <div id="asymmetric" class="tool-panel">
-                <div class="panel-header">
-                    <div>
-                        <h1 class="panel-title">Asymmetric Encryption</h1>
-                        <p class="panel-description">
-                            Secure RSA-OAEP encryption for key exchange and small data encryption using public/private key pairs.
-                        </p>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Asymmetric Encryption (RSA-OAEP)</h3>
-                        <span class="card-badge">RSA-OAEP</span>
-                    </div>
-                    <div class="guide">
-                        <h3>What is Asymmetric Encryption?</h3>
-                        <p>Uses a public/private key pair for secure encryption. Encrypt with the public key and decrypt with the private key.</p>
-                        <p><b>How to Use:</b> Generate keys in the "Key Generation" tab. Enter text and public key for encryption, or encrypted data and private key for decryption.</p>
-                        <p><b>Common Errors:</b><br>
-                        - "Invalid key": Ensure keys are valid PEM format.<br>
-                        - "Data too large": RSA is limited to small data.<br>
-                        - "Invalid encrypted data": Check base64 validity.</p>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Text to Encrypt/Decrypt</label>
-                        <textarea class="form-textarea" id="asym-input" placeholder="Enter text to encrypt/decrypt" rows="6"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Public Key (encrypt) or Private Key (decrypt, PEM)</label>
-                        <textarea class="form-textarea" id="asym-key" placeholder="Enter public or private key in PEM format" rows="4"></textarea>
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn btn-primary" onclick="asymmetricEncrypt()" data-tooltip="Encrypt Data">
-                            <i class="fas fa-lock"></i>
-                            Encrypt
-                        </button>
-                        <button class="btn btn-secondary" onclick="asymmetricDecrypt()" data-tooltip="Decrypt Data">
-                            <i class="fas fa-unlock"></i>
-                            Decrypt
-                        </button>
-                        <button class="btn btn-success" onclick="copyOutput('asym-output')" data-tooltip="Copy Result">
-                            <i class="fas fa-copy"></i>
-                            Copy Output
-                        </button>
-                    </div>
-                    <div class="output-area">
-                        <label class="form-label">Result</label>
-                        <textarea class="form-textarea crypto-visual" id="asym-output" readonly placeholder="Output will appear here" rows="8"></textarea>
-                        <button class="copy-btn" onclick="copyOutput('asym-output')" data-tooltip="Copy Result"><i class="fas fa-copy"></i></button>
-                    </div>
-                    <div class="status-message" id="asym-message"></div>
-                </div>
-            </div>
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-group">
+    <div class="sidebar-label">Encrypt &amp; Decrypt</div>
+    <div class="nav-item active" data-panel="symmetric" onclick="showPanel('symmetric')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Symmetric (AES-GCM)</div>
+    <div class="nav-item" data-panel="asymmetric" onclick="showPanel('asymmetric')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="12" r="4"/><path d="M12 12h9M17 12v4M20 12v3"/></svg>Asymmetric (RSA-OAEP)</div>
+    <div class="nav-item" data-panel="files" onclick="showPanel('files')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>File Tools</div>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-label">Integrity &amp; Auth</div>
+    <div class="nav-item" data-panel="hashing" onclick="showPanel('hashing')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18"/></svg>Hashing</div>
+    <div class="nav-item" data-panel="hmac" onclick="showPanel('hmac')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>HMAC</div>
+    <div class="nav-item" data-panel="signature" onclick="showPanel('signature')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3z"/></svg>Digital Signature</div>
+    <div class="nav-item" data-panel="compare" onclick="showPanel('compare')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v18M16 3v18M3 8h5M16 8h5M3 16h5M16 16h5"/></svg>Compare Values</div>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-label">Keys &amp; Derivation</div>
+    <div class="nav-item" data-panel="keygen" onclick="showPanel('keygen')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="17" r="4"/><path d="m10 14 9-9 3 3-2 2 2 2-3 3-2-2-2 2"/></svg>Key Generation</div>
+    <div class="nav-item" data-panel="pbkdf2" onclick="showPanel('pbkdf2')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/><circle cx="12" cy="12" r="3"/></svg>PBKDF2 / Argon2id</div>
+    <div class="nav-item" data-panel="dh" onclick="showPanel('dh')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 12a4 4 0 1 1 8 0 4 4 0 0 1-8 0"/><path d="M2 12h4M18 12h4"/></svg>Key Exchange (ECDH)</div>
+  </div>
+  <div class="sidebar-group">
+    <div class="sidebar-label">Encoding &amp; Utilities</div>
+    <div class="nav-item" data-panel="jwt" onclick="showPanel('jwt')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h6"/></svg>JWT Tool</div>
+    <div class="nav-item" data-panel="encoding" onclick="showPanel('encoding')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg>Encoding</div>
+    <div class="nav-item" data-panel="utils" onclick="showPanel('utils')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>Password &amp; Entropy</div>
+    <div class="nav-item" data-panel="history" onclick="showPanel('history')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>History</div>
+  </div>
+  <div class="nav-note">Runs entirely client-side. Nothing here is sent to a server — treat it as a learning &amp; prototyping tool, not a production key vault.</div>
+</nav>
 
-            <!-- Hashing -->
-            <div id="hashing" class="tool-panel">
-                <div class="panel-header">
-                    <div>
-                        <h1 class="panel-title">Hashing</h1>
-                        <p class="panel-description">
-                            Generate fixed-size digests for data integrity and password storage with multiple algorithms.
-                        </p>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Hashing Tools</h3>
-                    </div>
-                    <div class="guide">
-                        <h3>What is Hashing?</h3>
-                        <p>Creates a fixed-size digest from data for integrity checks or password storage. Supports SHA-1, SHA-256, SHA-512, MD5, and Blake2b.</p>
-                        <p><b>How to Use:</b> Enter text, select an algorithm, and click "Hash".</p>
-                        <p><b>Common Errors:</b><br>
-                        - "Empty input": Provide text to hash.</p>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Text to Hash</label>
-                        <textarea class="form-textarea" id="hash-input" placeholder="Enter text to hash" rows="6"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Hash Algorithm</label>
-                        <select class="form-select" id="hash-algorithm">
-                            <option value="SHA-1">SHA-1</option>
-                            <option value="SHA-256">SHA-256</option>
-                            <option value="SHA-512">SHA-512</option>
-                            <option value="MD5">MD5</option>
-                            <option value="BLAKE2b">Blake2b</option>
-                        </select>
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn btn-primary" onclick="hashData()" data-tooltip="Generate Hash">
-                            <i class="fas fa-tags"></i>
-                            Hash
-                        </button>
-                        <button class="btn btn-success" onclick="copyOutput('hash-output')" data-tooltip="Copy Result">
-                            <i class="fas fa-copy"></i>
-                            Copy Output
-                        </button>
-                    </div>
-                    <div class="output-area">
-                        <label class="form-label">Result</label>
-                        <textarea class="form-textarea crypto-visual" id="hash-output" readonly placeholder="Hash will appear here" rows="8"></textarea>
-                        <button class="copy-btn" onclick="copyOutput('hash-output')" data-tooltip="Copy Result"><i class="fas fa-copy"></i></button>
-                    </div>
-                    <div class="status-message" id="hash-message"></div>
-                </div>
-            </div>
+<!-- Main -->
+<main class="main">
+  <div class="content">
 
-            <!-- HMAC -->
-            <div id="hmac" class="tool-panel">
-                <div class="panel-header">
-                    <div>
-                        <h1 class="panel-title">HMAC</h1>
-                        <p class="panel-description">
-                            Generate Hash-based Message Authentication Codes for data integrity and authenticity.
-                        </p>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">HMAC Generation</h3>
-                    </div>
-                    <div class="guide">
-                        <h3>What is HMAC?</h3>
-                        <p>Ensures data integrity and authenticity using a key. Supports HMAC with SHA-256 and SHA-512.</p>
-                        <p><b>How to Use:</b> Enter text and a key, select an algorithm, and click "Generate HMAC".</p>
-                        <p><b>Common Errors:</b><br>
-                        - "Empty input or key": Provide both text and a key.<br>
-                        - "Invalid key": Ensure the key is valid text.</p>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Text to Authenticate</label>
-                        <textarea class="form-textarea" id="hmac-input" placeholder="Enter text to authenticate" rows="6"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Key (text)</label>
-                        <input type="text" class="form-input" id="hmac-key" placeholder="Key (text)">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">HMAC Algorithm</label>
-                        <select class="form-select" id="hmac-algorithm">
-                            <option value="SHA-256">HMAC-SHA-256</option>
-                            <option value="SHA-512">HMAC-SHA-512</option>
-                        </select>
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn btn-primary" onclick="generateHmac()" data-tooltip="Generate HMAC">
-                            <i class="fas fa-check-circle"></i>
-                            Generate HMAC
-                        </button>
-                        <button class="btn btn-success" onclick="copyOutput('hmac-output')" data-tooltip="Copy Result">
-                            <i class="fas fa-copy"></i>
-                            Copy Output
-                        </button>
-                    </div>
-                    <div class="output-area">
-                        <label class="form-label">Result</label>
-                        <textarea class="form-textarea crypto-visual" id="hmac-output" readonly placeholder="HMAC will appear here" rows="8"></textarea>
-                        <button class="copy-btn" onclick="copyOutput('hmac-output')" data-tooltip="Copy Result"><i class="fas fa-copy"></i></button>
-                    </div>
-                    <div class="status-message" id="hmac-message"></div>
-                </div>
-            </div>
-
-            <!-- PBKDF2 -->
-            <div id="pbkdf2" class="tool-panel">
-                <div class="panel-header">
-                    <div>
-                        <h1 class="panel-title">PBKDF2</h1>
-                        <p class="panel-description">
-                            Derive secure keys from passwords using PBKDF2 for storage or key generation.
-                        </p>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Key Derivation</h3>
-                    </div>
-                    <div class="guide">
-                        <h3>What is PBKDF2?</h3>
-                        <p>Derives a secure key from a password and salt, ideal for secure storage or key generation.</p>
-                        <p><b>How to Use:</b> Enter a password and optional salt (base64-encoded). Click "Derive Key".</p>
-                        <p><b>Common Errors:</b><br>
-                        - "Empty password": Provide a password.<br>
-                        - "Invalid salt": Ensure the salt is valid base64 or leave blank.</p>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Password</label>
-                        <input type="text" class="form-input" id="pbkdf2-password" placeholder="Enter password">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Salt (base64, optional)</label>
-                        <input type="text" class="form-input" id="pbkdf2-salt" placeholder="Salt (base64, optional)">
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn btn-primary" onclick="deriveKey()" data-tooltip="Derive Key">
-                            <i class="fas fa-sync"></i>
-                            Derive Key
-                        </button>
-                        <button class="btn btn-success" onclick="copyOutput('pbkdf2-output')" data-tooltip="Copy Result">
-                            <i class="fas fa-copy"></i>
-                            Copy Output
-                        </button>
-                    </div>
-                    <div class="output-area">
-                        <label class="form-label">Result</label>
-                        <textarea class="form-textarea crypto-visual" id="pbkdf2-output" readonly placeholder="Derived key will appear here" rows="8"></textarea>
-                        <button class="copy-btn" onclick="copyOutput('pbkdf2-output')" data-tooltip="Copy Result"><i class="fas fa-copy"></i></button>
-                    </div>
-                    <div class="status-message" id="pbkdf2-message"></div>
-                </div>
-            </div>
-
-            <!-- Digital Signature -->
-            <div id="signature" class="tool-panel">
-                <div class="panel-header">
-                    <div>
-                        <h1 class="panel-title">Digital Signature</h1>
-                        <p class="panel-description">
-                            Ensure data authenticity and integrity with RSA-PSS digital signatures.
-                        </p>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Signature Tools</h3>
-                        <span class="card-badge">RSA-PSS</span>
-                    </div>
-                    <div class="guide">
-                        <h3>What is a Digital Signature?</h3>
-                        <p>Ensures data authenticity using a private key to sign and a public key to verify.</p>
-                        <p><b>How to Use:</b> Generate keys in the "Key Generation" tab. Enter text and private key to sign, or text, signature, and public key to verify.</p>
-                        <p><b>Common Errors:</b><br>
-                        - "Invalid key": Ensure keys are valid PEM format.<br>
-                        - "Empty input": Provide text and appropriate keys.<br>
-                        - "Invalid signature": Check signature validity.</p>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Text to Sign/Verify</label>
-                        <textarea class="form-textarea" id="sig-input" placeholder="Enter text to sign/verify" rows="6"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Private Key (sign) or Public Key (verify, PEM)</label>
-                        <textarea class="form-textarea" id="sig-key" placeholder="Enter key in PEM format" rows="4"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Signature (base64, for verify)</label>
-                        <input type="text" class="form-input" id="sig-signature" placeholder="Signature (base64)">
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn btn-primary" onclick="signData()" data-tooltip="Sign Data">
-                            <i class="fas fa-signature"></i>
-                            Sign
-                        </button>
-                        <button class="btn btn-secondary" onclick="verifySignature()" data-tooltip="Verify Signature">
-                            <i class="fas fa-check-circle"></i>
-                            Verify
-                        </button>
-                        <button class="btn btn-success" onclick="copyOutput('sig-output')" data-tooltip="Copy Result">
-                            <i class="fas fa-copy"></i>
-                            Copy Output
-                        </button>
-                    </div>
-                    <div class="output-area">
-                        <label class="form-label">Result</label>
-                        <textarea class="form-textarea crypto-visual" id="sig-output" readonly placeholder="Output will appear here" rows="8"></textarea>
-                        <button class="copy-btn" onclick="copyOutput('sig-output')" data-tooltip="Copy Result"><i class="fas fa-copy"></i></button>
-                    </div>
-                    <div class="status-message" id="sig-message"></div>
-                </div>
-            </div>
-
-            <!-- Key Generation -->
-            <div id="keygen" class="tool-panel">
-                <div class="panel-header">
-                    <div>
-                        <h1 class="panel-title">Key Generation</h1>
-                        <p class="panel-description">
-                            Generate secure AES-GCM and RSA keys for cryptographic operations.
-                        </p>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Key Generation Tools</h3>
-                    </div>
-                    <div class="guide">
-                        <h3>What is Key Generation?</h3>
-                        <p>Generates secure keys for symmetric (AES-GCM) and asymmetric (RSA) encryption.</p>
-                        <p><b>How to Use:</b> Select key type and click "Generate". Copy keys for use in other tools.</p>
-                        <p><b>Common Errors:</b><br>
-                        - None; keys are generated securely.</p>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Key Type</label>
-                        <select class="form-select" id="keygen-type">
-                            <option value="aes">AES-GCM (Symmetric)</option>
-                            <option value="rsa">RSA (Asymmetric)</option>
-                        </select>
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn btn-primary" onclick="generateKey()" data-tooltip="Generate Key">
-                            <i class="fas fa-key"></i>
-                            Generate
-                        </button>
-                        <button class="btn btn-success" onclick="copyOutput('keygen-output')" data-tooltip="Copy Result">
-                            <i class="fas fa-copy"></i>
-                            Copy Output
-                        </button>
-                    </div>
-                    <div class="output-area">
-                        <label class="form-label">Result</label>
-                        <textarea class="form-textarea crypto-visual" id="keygen-output" readonly placeholder="Generated key(s) will appear here" rows="8"></textarea>
-                        <button class="copy-btn" onclick="copyOutput('keygen-output')" data-tooltip="Copy Result"><i class="fas fa-copy"></i></button>
-                    </div>
-                    <div class="status-message" id="keygen-message"></div>
-                </div>
-            </div>
-
-            <!-- Diffie-Hellman -->
-            <div id="dh" class="tool-panel">
-                <div class="panel-header">
-                    <div>
-                        <h1 class="panel-title">Diffie-Hellman</h1>
-                        <p class="panel-description">
-                            Simulate Diffie-Hellman key exchange for establishing shared secrets.
-                        </p>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Key Exchange</h3>
-                    </div>
-                    <div class="guide">
-                        <h3>What is Diffie-Hellman?</h3>
-                        <p>Allows two parties to establish a shared secret over an insecure channel.</p>
-                        <p><b>How to Use:</b> Click "Generate Shared Secret" to simulate a DH key exchange.</p>
-                        <p><b>Common Errors:</b><br>
-                        - None; simplified for educational purposes.</p>
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn btn-primary" onclick="dhExchange()" data-tooltip="Generate Secret">
-                            <i class="fas fa-handshake"></i>
-                            Generate Shared Secret
-                        </button>
-                        <button class="btn btn-success" onclick="copyOutput('dh-output')" data-tooltip="Copy Result">
-                            <i class="fas fa-copy"></i>
-                            Copy Output
-                        </button>
-                    </div>
-                    <div class="output-area">
-                        <label class="form-label">Result</label>
-                        <textarea class="form-textarea crypto-visual" id="dh-output" readonly placeholder="Shared secret will appear here" rows="8"></textarea>
-                        <button class="copy-btn" onclick="copyOutput('dh-output')" data-tooltip="Copy Result"><i class="fas fa-copy"></i></button>
-                    </div>
-                    <div class="status-message" id="dh-message"></div>
-                </div>
-            </div>
-
-            <!-- Encoding -->
-            <div id="encoding" class="tool-panel">
-                <div class="panel-header">
-                    <div>
-                        <h1 class="panel-title">Encoding</h1>
-                        <p class="panel-description">
-                            Convert data to Base64 or Hex for safe storage or transmission.
-                        </p>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Encoding Tools</h3>
-                    </div>
-                    <div class="guide">
-                        <h3>What is Encoding?</h3>
-                        <p>Converts data into formats like Base64 or Hex for safe handling.</p>
-                        <p><b>How to Use:</b> Enter text, select encode/decode and format, then click "Process".</p>
-                        <p><b>Common Errors:</b><br>
-                        - "Invalid input": Ensure input matches the selected encoding.<br>
-                        - "Empty input": Provide text to process.</p>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Text to Encode/Decode</label>
-                        <textarea class="form-textarea" id="enc-input" placeholder="Enter text to encode/decode" rows="6"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Encoding Type</label>
-                        <select class="form-select" id="enc-type">
-                            <option value="base64-encode">Base64 Encode</option>
-                            <option value="base64-decode">Base64 Decode</option>
-                            <option value="hex-encode">Hex Encode</option>
-                            <option value="hex-decode">Hex Decode</option>
-                        </select>
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn btn-primary" onclick="encodeDecode()" data-tooltip="Process Encoding">
-                            <i class="fas fa-code"></i>
-                            Process
-                        </button>
-                        <button class="btn btn-success" onclick="copyOutput('enc-output')" data-tooltip="Copy Result">
-                            <i class="fas fa-copy"></i>
-                            Copy Output
-                        </button>
-                    </div>
-                    <div class="output-area">
-                        <label class="form-label">Result</label>
-                        <textarea class="form-textarea crypto-visual" id="enc-output" readonly placeholder="Output will appear here" rows="8"></textarea>
-                        <button class="copy-btn" onclick="copyOutput('enc-output')" data-tooltip="Copy Result"><i class="fas fa-copy"></i></button>
-                    </div>
-                    <div class="status-message" id="enc-message"></div>
-                </div>
-            </div>
-
-            <!-- Utilities -->
-            <div id="utils" class="tool-panel">
-                <div class="panel-header">
-                    <div>
-                        <h1 class="panel-title">Utilities</h1>
-                        <p class="panel-description">
-                            Tools for generating random passwords and analyzing data entropy.
-                        </p>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Utility Tools</h3>
-                    </div>
-                    <div class="guide">
-                        <h3>What are Utilities?</h3>
-                        <p>Includes random password generation and entropy analysis for data randomness.</p>
-                        <p><b>How to Use:</b> Specify password length and click "Generate Password", or enter text and click "Analyze Entropy".</p>
-                        <p><b>Common Errors:</b><br>
-                        - "Invalid length": Ensure password length is positive.<br>
-                        - "Empty input": Provide text for entropy analysis.</p>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Password Length</label>
-                        <input type="number" class="form-input" id="pass-length" placeholder="Password length (e.g., 16)" min="1">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Text for Entropy Analysis</label>
-                        <textarea class="form-textarea" id="utils-input" placeholder="Enter text for entropy analysis" rows="6"></textarea>
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn btn-primary" onclick="generatePassword()" data-tooltip="Generate Password">
-                            <i class="fas fa-dice"></i>
-                            Generate Password
-                        </button>
-                        <button class="btn btn-primary" onclick="analyzeEntropy()" data-tooltip="Analyze Entropy">
-                            <i class="fas fa-chart-bar"></i>
-                            Analyze Entropy
-                        </button>
-                        <button class="btn btn-success" onclick="copyOutput('utils-output')" data-tooltip="Copy Result">
-                            <i class="fas fa-copy"></i>
-                            Copy Output
-                        </button>
-                    </div>
-                    <div class="output-area">
-                        <label class="form-label">Result</label>
-                        <textarea class="form-textarea crypto-visual" id="utils-output" readonly placeholder="Output will appear here" rows="8"></textarea>
-                        <button class="copy-btn" onclick="copyOutput('utils-output')" data-tooltip="Copy Result"><i class="fas fa-copy"></i></button>
-                    </div>
-                    <div class="status-message" id="utils-message"></div>
-                </div>
-            </div>
+    <!-- SYMMETRIC -->
+    <section id="symmetric" class="panel active">
+      <div class="panel-head">
+        <span class="panel-eyebrow">AES-GCM · WebCrypto</span>
+        <h1 class="panel-title">Symmetric Encryption</h1>
+        <p class="panel-desc">One key encrypts and decrypts. AES-GCM bundles in authentication, so tampering with the ciphertext is detected automatically.</p>
+      </div>
+      <div class="trust-banner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 4 6v6c0 5 3.4 8.5 8 9 4.6-.5 8-4 8-9V6z"/></svg>Keys and plaintext never leave this browser tab.</div>
+      <div class="card">
+        <div class="info-toggle" onclick="toggleInfo(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 6 6 6-6 6"/></svg>How this works</div>
+        <div class="info-box">A random 256-bit key is generated if you don't supply one. Each encryption uses a fresh 12-byte IV, prepended to the ciphertext so decryption can recover it. Reusing an IV with the same key breaks AES-GCM's security guarantees — this tool always generates a new one per operation.</div>
+        <div class="field">
+          <label class="field-label">Plaintext / ciphertext</label>
+          <textarea class="input" id="sym-input" placeholder="Text to encrypt, or base64 ciphertext to decrypt" rows="5"></textarea>
         </div>
-    </main>
-
-    <script>
-        // Global state management
-        const AppState = {
-            currentTheme: 'light',
-            activePanel: 'symmetric',
-            mobileMenuOpen: false,
-            settingsOpen: false
-        };
-
-        // Utility functions
-        function strToArrayBuffer(str) {
-            const encoder = new TextEncoder();
-            return encoder.encode(str);
-        }
-
-        async function arrayBufferToString(buffer) {
-            const decoder = new TextDecoder();
-            return decoder.decode(buffer);
-        }
-
-        function arrayBufferToBase64(buffer) {
-            return btoa(String.fromCharCode(...new Uint8Array(buffer)));
-        }
-
-        function base64ToArrayBuffer(base64) {
-            const binary = atob(base64);
-            const len = binary.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binary.charCodeAt(i);
-            }
-            return bytes.buffer;
-        }
-
-        function showStatus(elementId, message, type = 'success') {
-            const statusElement = document.getElementById(elementId);
-            if (statusElement) {
-                statusElement.textContent = message;
-                statusElement.className = `status-message status-${type} show`;
-                setTimeout(() => {
-                    statusElement.classList.remove('show');
-                }, 5000);
-            }
-        }
-
-        async function copyOutput(outputId) {
-            const element = document.getElementById(outputId);
-            if (element) {
-                try {
-                    await navigator.clipboard.writeText(element.value);
-                    showStatus(outputId.replace('-output', '-message'), 'Copied to clipboard!', 'success');
-                } catch (err) {
-                    element.select();
-                    document.execCommand('copy');
-                    showStatus(outputId.replace('-output', '-message'), 'Copied to clipboard!', 'success');
-                }
-            }
-        }
-
-        function showPanel(panelId) {
-            document.querySelectorAll('.tool-panel').forEach(panel => {
-                panel.classList.remove('active');
-            });
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-
-            const panel = document.getElementById(panelId);
-            if (panel) {
-                panel.classList.add('active');
-                AppState.activePanel = panelId;
-            }
-
-            const navItem = document.querySelector(`[onclick="showPanel('${panelId}')"]`);
-            if (navItem) {
-                navItem.classList.add('active');
-            }
-
-            if (AppState.mobileMenuOpen) {
-                toggleMobileMenu();
-            }
-            if (AppState.settingsOpen) {
-                toggleSettings();
-            }
-        }
-
-        function toggleMobileMenu() {
-            const nav = document.getElementById('navigation');
-            AppState.mobileMenuOpen = !AppState.mobileMenuOpen;
-            if (AppState.mobileMenuOpen) {
-                nav.classList.add('mobile-open');
-            } else {
-                nav.classList.remove('mobile-open');
-            }
-        }
-
-        function toggleSettings() {
-            const settings = document.getElementById('settings');
-            AppState.settingsOpen = !AppState.settingsOpen;
-            if (AppState.settingsOpen) {
-                settings.classList.add('active');
-            } else {
-                settings.classList.remove('active');
-            }
-        }
-
-        function setTheme(theme) {
-            const body = document.body;
-            const themeToggle = document.querySelector('.theme-toggle');
-            AppState.currentTheme = theme;
-
-            if (theme === 'light') {
-                body.style.setProperty('--bg-primary', '#ffffff');
-                body.style.setProperty('--bg-secondary', '#f5f5f5');
-                body.style.setProperty('--bg-tertiary', '#e0e0e0');
-                body.style.setProperty('--text-primary', '#333333');
-                body.style.setProperty('--text-secondary', '#666666');
-                body.style.setProperty('--text-muted', '#999999');
-                body.style.setProperty('--border-primary', '#d1d5db');
-                body.style.setProperty('--border-accent', '#b3b3b3');
-                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
-            } else if (theme === 'dark') {
-                body.style.setProperty('--bg-primary', '#1a1a1a');
-                body.style.setProperty('--bg-secondary', '#2c2c2c');
-                body.style.setProperty('--bg-tertiary', '#3d3d3d');
-                body.style.setProperty('--text-primary', '#ffffff');
-                body.style.setProperty('--text-secondary', '#cccccc');
-                body.style.setProperty('--text-muted', '#999999');
-                body.style.setProperty('--border-primary', '#4a4a4a');
-                body.style.setProperty('--border-accent', '#666666');
-                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-            } else {
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                setTheme(prefersDark ? 'dark' : 'light');
-            }
-        }
-
-        function showInfo() {
-            alert(`CryptoTool
-
-A modern cryptography suite for developers.
-
-Features:
-• Symmetric Encryption (AES-GCM)
-• Asymmetric Encryption (RSA-OAEP)
-• Hashing (SHA-1, SHA-256, SHA-512, MD5, Blake2b)
-• HMAC (SHA-256, SHA-512)
-• PBKDF2 Key Derivation
-• Digital Signatures (RSA-PSS)
-• Key Generation (AES, RSA)
-• Diffie-Hellman Key Exchange
-• Encoding (Base64, Hex)
-• Utilities (Password Generation, Entropy Analysis)
-
-Built with modern web standards and a clean, professional UI.`);
-        }
-
-        // JSBN Mock for RSA
-        const JSBN = {
-            generateRSA: function() {
-                const p = BigInt('0x' + crypto.getRandomValues(new Uint8Array(16)).map(b => b.toString(16).padStart(2, '0')).join(''));
-                const q = BigInt('0x' + crypto.getRandomValues(new Uint8Array(16)).map(b => b.toString(16).padStart(2, '0')).join(''));
-                const n = p * q;
-                const e = BigInt(65537);
-                const d = BigInt(123456789);
-                return {
-                    publicKey: `-----BEGIN PUBLIC KEY-----\n${btoa(n.toString())}\n-----END PUBLIC KEY-----`,
-                    privateKey: `-----BEGIN PRIVATE KEY-----\n${btoa(d.toString())}\n-----END PRIVATE KEY-----`
-                };
-            },
-            rsaEncrypt: function(data, publicKey) {
-                return btoa(data);
-            },
-            rsaDecrypt: function(encrypted, privateKey) {
-                return atob(encrypted);
-            },
-            rsaSign: function(data, privateKey) {
-                return btoa(data);
-            },
-            rsaVerify: function(data, signature, publicKey) {
-                return atob(signature) === data;
-            }
-        };
-
-        // Symmetric Encryption
-        async function symmetricEncrypt() {
-            const input = document.getElementById('sym-input').value;
-            const keyInput = document.getElementById('sym-key').value;
-            const output = document.getElementById('sym-output');
-            const message = document.getElementById('sym-message');
-
-            if (!input) {
-                showStatus('sym-message', 'Empty input: Please enter text to encrypt.', 'error');
-                return;
-            }
-
-            const encryptBtn = document.querySelector('#symmetric .btn-primary');
-            encryptBtn.classList.add('loading');
-
-            try {
-                let key;
-                if (keyInput) {
-                    key = await crypto.subtle.importKey(
-                        'raw',
-                        base64ToArrayBuffer(keyInput),
-                        { name: 'AES-GCM' },
-                        true,
-                        ['encrypt', 'decrypt']
-                    );
-                } else {
-                    key = await crypto.subtle.generateKey(
-                        { name: 'AES-GCM', length: 256 },
-                        true,
-                        ['encrypt', 'decrypt']
-                    );
-                    const exportedKey = await crypto.subtle.exportKey('raw', key);
-                    document.getElementById('sym-key').value = arrayBufferToBase64(exportedKey);
-                }
-
-                const iv = crypto.getRandomValues(new Uint8Array(12));
-                const encodedData = strToArrayBuffer(input);
-                const encrypted = await crypto.subtle.encrypt(
-                    { name: 'AES-GCM', iv: iv },
-                    key,
-                    encodedData
-                );
-                const combined = new Uint8Array([...iv, ...new Uint8Array(encrypted)]);
-                output.value = arrayBufferToBase64(combined);
-                showStatus('sym-message', 'Encryption successful!', 'success');
-            } catch (e) {
-                showStatus('sym-message', `Error: ${e.message}. Ensure the key is valid base64 and 32 bytes long.`, 'error');
-            } finally {
-                encryptBtn.classList.remove('loading');
-            }
-        }
-
-        async function symmetricDecrypt() {
-            const input = document.getElementById('sym-input').value;
-            const keyInput = document.getElementById('sym-key').value;
-            const output = document.getElementById('sym-output');
-            const message = document.getElementById('sym-message');
-
-            if (!input || !keyInput) {
-                showStatus('sym-message', 'Empty input or key: Please provide both encrypted data and key.', 'error');
-                return;
-            }
-
-            const decryptBtn = document.querySelector('#symmetric .btn-secondary');
-            decryptBtn.classList.add('loading');
-
-            try {
-                const key = await crypto.subtle.importKey(
-                    'raw',
-                    base64ToArrayBuffer(keyInput),
-                    { name: 'AES-GCM' },
-                    false,
-                    ['decrypt']
-                );
-                const combined = base64ToArrayBuffer(input);
-                if (combined.byteLength < 12) {
-                    throw new Error('Invalid encrypted data: Must include 12-byte IV.');
-                }
-                const iv = combined.slice(0, 12);
-                const encryptedData = combined.slice(12);
-                const decrypted = await crypto.subtle.decrypt(
-                    { name: 'AES-GCM', iv: iv },
-                    key,
-                    encryptedData
-                );
-                output.value = await arrayBufferToString(decrypted);
-                showStatus('sym-message', 'Decryption successful!', 'success');
-            } catch (e) {
-                showStatus('sym-message', `Error: ${e.message}. Check that the input is valid base64 and includes the 12-byte IV, and the key is correct.`, 'error');
-            } finally {
-                decryptBtn.classList.remove('loading');
-            }
-        }
-
-        // Asymmetric Encryption (Mock RSA)
-        async function asymmetricEncrypt() {
-            const input = document.getElementById('asym-input').value;
-            const key = document.getElementById('asym-key').value;
-            const output = document.getElementById('asym-output');
-            const message = document.getElementById('asym-message');
-
-            if (!input || !key) {
-                showStatus('asym-message', 'Empty input or key: Please provide text and a public key.', 'error');
-                return;
-            }
-
-            const encryptBtn = document.querySelector('#asymmetric .btn-primary');
-            encryptBtn.classList.add('loading');
-
-            try {
-                if (!key.includes('PUBLIC KEY')) {
-                    throw new Error('Invalid public key: Must be in PEM format.');
-                }
-                output.value = JSBN.rsaEncrypt(input, key);
-                showStatus('asym-message', 'Encryption successful! (Note: Mock RSA implementation)', 'success');
-            } catch (e) {
-                showStatus('asym-message', `Error: ${e.message}. Ensure the public key is valid PEM format and data is not too large.`, 'error');
-            } finally {
-                encryptBtn.classList.remove('loading');
-            }
-        }
-
-        async function asymmetricDecrypt() {
-            const input = document.getElementById('asym-input').value;
-            const key = document.getElementById('asym-key').value;
-            const output = document.getElementById('asym-output');
-            const message = document.getElementById('asym-message');
-
-            if (!input || !key) {
-                showStatus('asym-message', 'Empty input or key: Please provide encrypted data and a private key.', 'error');
-                return;
-            }
-
-            const decryptBtn = document.querySelector('#asymmetric .btn-secondary');
-            decryptBtn.classList.add('loading');
-
-            try {
-                if (!key.includes('PRIVATE KEY')) {
-                    throw new Error('Invalid private key: Must be in PEM format.');
-                }
-                output.value = JSBN.rsaDecrypt(input, key);
-                showStatus('asym-message', 'Decryption successful! (Note: Mock RSA implementation)', 'success');
-            } catch (e) {
-                showStatus('asym-message', `Error: ${e.message}. Ensure the private key is valid PEM format and the input is valid.`, 'error');
-            } finally {
-                decryptBtn.classList.remove('loading');
-            }
-        }
-
-        // Hashing
-        async function hashData() {
-            const input = document.getElementById('hash-input').value;
-            const algorithm = document.getElementById('hash-algorithm').value;
-            const output = document.getElementById('hash-output');
-            const message = document.getElementById('hash-message');
-
-            if (!input) {
-                showStatus('hash-message', 'Empty input: Please enter text to hash.', 'error');
-                return;
-            }
-
-            const hashBtn = document.querySelector('#hashing .btn-primary');
-            hashBtn.classList.add('loading');
-
-            try {
-                let hash;
-                if (algorithm === 'BLAKE2b') {
-                    const data = strToArrayBuffer(input);
-                    hash = new Uint8Array(32).fill(0);
-                } else {
-                    const data = strToArrayBuffer(input);
-                    hash = await crypto.subtle.digest(algorithm, data);
-                }
-                const hashArray = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-                output.value = hashArray;
-                showStatus('hash-message', algorithm === 'BLAKE2b' ? 'Hashing successful! (Mock Blake2b)' : 'Hashing successful!', 'success');
-            } catch (e) {
-                showStatus('hash-message', `Error: ${e.message}. Ensure input is valid.`, 'error');
-            } finally {
-                hashBtn.classList.remove('loading');
-            }
-        }
-
-        // HMAC
-        async function generateHmac() {
-            const input = document.getElementById('hmac-input').value;
-            const key = document.getElementById('hmac-key').value;
-            const algorithm = document.getElementById('hmac-algorithm').value;
-            const output = document.getElementById('hmac-output');
-            const message = document.getElementById('hmac-message');
-
-            if (!input || !key) {
-                showStatus('hmac-message', 'Empty input or key: Please provide both text and a key.', 'error');
-                return;
-            }
-
-            const hmacBtn = document.querySelector('#hmac .btn-primary');
-            hmacBtn.classList.add('loading');
-
-            try {
-                const keyData = strToArrayBuffer(key);
-                const cryptoKey = await crypto.subtle.importKey(
-                    'raw',
-                    keyData,
-                    { name: 'HMAC', hash: algorithm },
-                    false,
-                    ['sign']
-                );
-                const data = strToArrayBuffer(input);
-                const signature = await crypto.subtle.sign('HMAC', cryptoKey, data);
-                const signatureArray = Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, '0')).join('');
-                output.value = signatureArray;
-                showStatus('hmac-message', 'HMAC generated successfully!', 'success');
-            } catch (e) {
-                showStatus('hmac-message', `Error: ${e.message}. Ensure the key and input are valid.`, 'error');
-            } finally {
-                hmacBtn.classList.remove('loading');
-            }
-        }
-
-        // PBKDF2
-        async function deriveKey() {
-            const password = document.getElementById('pbkdf2-password').value;
-            const saltInput = document.getElementById('pbkdf2-salt').value;
-            const output = document.getElementById('pbkdf2-output');
-            const message = document.getElementById('pbkdf2-message');
-
-            if (!password) {
-                showStatus('pbkdf2-message', 'Empty password: Please provide a password.', 'error');
-                return;
-            }
-
-            const deriveBtn = document.querySelector('#pbkdf2 .btn-primary');
-            deriveBtn.classList.add('loading');
-
-            try {
-                const salt = saltInput ? base64ToArrayBuffer(saltInput) : crypto.getRandomValues(new Uint8Array(16));
-                const key = await crypto.subtle.deriveKey(
-                    {
-                        name: 'PBKDF2',
-                        salt: salt,
-                        iterations: 100000,
-                        hash: 'SHA-256'
-                    },
-                    await crypto.subtle.importKey('raw', strToArrayBuffer(password), 'PBKDF2', false, ['deriveKey']),
-                    { name: 'AES-GCM', length: 256 },
-                    true,
-                    ['encrypt', 'decrypt']
-                );
-                const exportedKey = await crypto.subtle.exportKey('raw', key);
-                output.value = `Key: ${arrayBufferToBase64(exportedKey)}\nSalt: ${arrayBufferToBase64(salt)}`;
-                showStatus('pbkdf2-message', 'Key derivation successful!', 'success');
-            } catch (e) {
-                showStatus('pbkdf2-message', `Error: ${e.message}. Ensure the salt is valid base64 or leave blank.`, 'error');
-            } finally {
-                deriveBtn.classList.remove('loading');
-            }
-        }
-
-        // Digital Signature
-        async function signData() {
-            const input = document.getElementById('sig-input').value;
-            const key = document.getElementById('sig-key').value;
-            const output = document.getElementById('sig-output');
-            const message = document.getElementById('sig-message');
-
-            if (!input || !key) {
-                showStatus('sig-message', 'Empty input or key: Please provide text and a private key.', 'error');
-                return;
-            }
-
-            const signBtn = document.querySelector('#signature .btn-primary');
-            signBtn.classList.add('loading');
-
-            try {
-                if (!key.includes('PRIVATE KEY')) {
-                    throw new Error('Invalid private key: Must be in PEM format.');
-                }
-                output.value = JSBN.rsaSign(input, key);
-                showStatus('sig-message', 'Signature generated! (Note: Mock RSA implementation)', 'success');
-            } catch (e) {
-                showStatus('sig-message', `Error: ${e.message}. Ensure the private key is valid PEM format.`, 'error');
-            } finally {
-                signBtn.classList.remove('loading');
-            }
-        }
-
-        async function verifySignature() {
-            const input = document.getElementById('sig-input').value;
-            const signature = document.getElementById('sig-signature').value;
-            const key = document.getElementById('sig-key').value;
-            const output = document.getElementById('sig-output');
-            const message = document.getElementById('sig-message');
-
-            if (!input || !signature || !key) {
-                showStatus('sig-message', 'Empty input, signature, or key: Please provide all fields.', 'error');
-                return;
-            }
-
-            const verifyBtn = document.querySelector('#signature .btn-secondary');
-            verifyBtn.classList.add('loading');
-
-            try {
-                if (!key.includes('PUBLIC KEY')) {
-                    throw new Error('Invalid public key: Must be in PEM format.');
-                }
-                const verified = JSBN.rsaVerify(input, signature, key);
-                output.value = `Signature Valid: ${verified}`;
-                showStatus('sig-message', 'Verification complete! (Note: Mock RSA implementation)', 'success');
-            } catch (e) {
-                showStatus('sig-message', `Error: ${e.message}. Ensure the public key and signature are valid.`, 'error');
-            } finally {
-                verifyBtn.classList.remove('loading');
-            }
-        }
-
-        // Key Generation
-        async function generateKey() {
-            const type = document.getElementById('keygen-type').value;
-            const output = document.getElementById('keygen-output');
-            const message = document.getElementById('keygen-message');
-
-            const generateBtn = document.querySelector('#keygen .btn-primary');
-            generateBtn.classList.add('loading');
-
-            try {
-                if (type === 'aes') {
-                    const key = await crypto.subtle.generateKey(
-                        { name: 'AES-GCM', length: 256 },
-                        true,
-                        ['encrypt', 'decrypt']
-                    );
-                    const exportedKey = await crypto.subtle.exportKey('raw', key);
-                    output.value = arrayBufferToBase64(exportedKey);
-                    showStatus('keygen-message', 'AES key generated successfully!', 'success');
-                } else {
-                    const { publicKey, privateKey } = JSBN.generateRSA();
-                    output.value = `Public Key:\n${publicKey}\n\nPrivate Key:\n${privateKey}`;
-                    showStatus('keygen-message', 'RSA key pair generated! (Note: Mock RSA implementation)', 'success');
-                }
-            } catch (e) {
-                showStatus('keygen-message', `Error: ${e.message}.`, 'error');
-            } finally {
-                generateBtn.classList.remove('loading');
-            }
-        }
-
-        // Diffie-Hellman
-        async function dhExchange() {
-            const output = document.getElementById('dh-output');
-            const message = document.getElementById('dh-message');
-
-            const dhBtn = document.querySelector('#dh .btn-primary');
-            dhBtn.classList.add('loading');
-
-            try {
-                const sharedSecret = crypto.getRandomValues(new Uint8Array(32));
-                output.value = arrayBufferToBase64(sharedSecret);
-                showStatus('dh-message', 'Shared secret generated! (Note: Simplified DH for demo)', 'success');
-            } catch (e) {
-                showStatus('dh-message', `Error: ${e.message}.`, 'error');
-            } finally {
-                dhBtn.classList.remove('loading');
-            }
-        }
-
-        // Encoding
-        async function encodeDecode() {
-            const input = document.getElementById('enc-input').value;
-            const type = document.getElementById('enc-type').value;
-            const output = document.getElementById('enc-output');
-            const message = document.getElementById('enc-message');
-
-            if (!input) {
-                showStatus('enc-message', 'Empty input: Please enter text to encode/decode.', 'error');
-                return;
-            }
-
-            const encodeBtn = document.querySelector('#encoding .btn-primary');
-            encodeBtn.classList.add('loading');
-
-            try {
-                let result;
-                if (type === 'base64-encode') {
-                    result = btoa(input);
-                } else if (type === 'base64-decode') {
-                    result = atob(input);
-                } else if (type === 'hex-encode') {
-                    result = Array.from(new TextEncoder().encode(input))
-                        .map(b => b.toString(16).padStart(2, '0'))
-                        .join('');
-                } else if (type === 'hex-decode') {
-                    if (!/^[0-9A-Fa-f]+$/.test(input) || input.length % 2 !== 0) {
-                        throw new Error('Invalid hex string');
-                    }
-                    const bytes = new Uint8Array(input.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
-                    result = new TextDecoder().decode(bytes);
-                }
-                output.value = result;
-                showStatus('enc-message', `${type.replace('-', ' ').toUpperCase()} successful!`, 'success');
-            } catch (e) {
-                showStatus('enc-message', `Error: ${e.message}. Ensure the input is valid for the selected encoding.`, 'error');
-            } finally {
-                encodeBtn.classList.remove('loading');
-            }
-        }
-
-        // Utilities
-        async function generatePassword() {
-            const lengthInput = document.getElementById('pass-length').value;
-            const output = document.getElementById('utils-output');
-            const message = document.getElementById('utils-message');
-
-            const length = parseInt(lengthInput, 10);
-            if (!length || length < 1) {
-                showStatus('utils-message', 'Invalid length: Please enter a positive number.', 'error');
-                return;
-            }
-
-            const passBtn = document.querySelector('#utils .btn-primary:nth-child(1)');
-            passBtn.classList.add('loading');
-
-            try {
-                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
-                const bytes = crypto.getRandomValues(new Uint8Array(length));
-                let password = '';
-                for (let i = 0; i < length; i++) {
-                    password += chars[bytes[i] % chars.length];
-                }
-                output.value = password;
-                showStatus('utils-message', 'Password generated successfully!', 'success');
-            } catch (e) {
-                showStatus('utils-message', `Error: ${e.message}.`, 'error');
-            } finally {
-                passBtn.classList.remove('loading');
-            }
-        }
-
-        async function analyzeEntropy() {
-            const input = document.getElementById('utils-input').value;
-            const output = document.getElementById('utils-output');
-            const message = document.getElementById('utils-message');
-
-            if (!input) {
-                showStatus('utils-message', 'Empty input: Please enter text for entropy analysis.', 'error');
-                return;
-            }
-
-            const entropyBtn = document.querySelector('#utils .btn-primary:nth-child(2)');
-            entropyBtn.classList.add('loading');
-
-            try {
-                const freq = {};
-                for (const char of input) {
-                    freq[char] = (freq[char] || 0) + 1;
-                }
-                const len = input.length;
-                let entropy = 0;
-                for (const count of Object.values(freq)) {
-                    const p = count / len;
-                    entropy -= p * Math.log2(p);
-                }
-                output.value = `Entropy: ${entropy.toFixed(2)} bits per character`;
-                showStatus('utils-message', 'Entropy analysis complete!', 'success');
-            } catch (e) {
-                showStatus('utils-message', `Error: ${e.message}.`, 'error');
-            } finally {
-                entropyBtn.classList.remove('loading');
-            }
-        }
-
-        // Theme toggle
-        function toggleTheme() {
-            const currentTheme = AppState.currentTheme === 'dark' ? 'light' : 'dark';
-            setTheme(currentTheme);
-            const select = document.querySelector('#settings .form-select');
-            if (select) {
-                select.value = currentTheme;
-            }
-        }
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            setTheme(savedTheme);
-            document.querySelector('#settings .form-select').value = savedTheme;
-
-            // Set default hash algorithm from settings
-            const defaultHash = localStorage.getItem('default-hash') || 'SHA-256';
-            document.getElementById('default-hash').value = defaultHash;
-            document.getElementById('hash-algorithm').value = defaultHash;
-
-            // Animation speed
-            const animationSpeed = localStorage.getItem('animation-speed') || 'normal';
-            document.getElementById('animation-speed').value = animationSpeed;
-            document.body.style.setProperty('--animation-duration', animationSpeed === 'fast' ? '0.2s' :
-            animationSpeed === 'slow' ? '0.5s' : '0.3s');
-// Save settings changes
-document.getElementById('default-hash').addEventListener('change', (e) => {
-localStorage.setItem('default-hash', e.target.value);
-document.getElementById('hash-algorithm').value = e.target.value;
-});
-document.getElementById('animation-speed').addEventListener('change', (e) => {
-localStorage.setItem('animation-speed', e.target.value);
-document.body.style.setProperty('--animation-duration', e.target.value === 'fast' ? '0.2s' : e.target.value === 'slow' ? '0.5s' : '0.3s');
-});
-// Handle system theme changes
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-if (AppState.currentTheme === 'system') {
-setTheme(e.matches ? 'dark' : 'light');
+        <div class="field">
+          <label class="field-label">Key <span class="tag" style="background:var(--accent-soft);color:var(--accent-deep)">base64, 32 bytes</span></label>
+          <input class="input" id="sym-key" placeholder="Leave blank to generate a new key on encrypt">
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="symEncrypt()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Encrypt</button>
+          <button class="btn btn-ghost" onclick="symDecrypt()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V9a4 4 0 0 1 7.5-2"/></svg>Decrypt</button>
+        </div>
+        <div class="field" style="margin-top:1.1rem">
+          <label class="field-label">Result</label>
+          <textarea class="input output-field" id="sym-output" readonly rows="5" placeholder="Output appears here"></textarea>
+        </div>
+        <div class="status" id="sym-status"></div>
+      </div>
+    </section>
+
+    <!-- ASYMMETRIC -->
+    <section id="asymmetric" class="panel">
+      <div class="panel-head">
+        <span class="panel-eyebrow">RSA-OAEP · WebCrypto</span>
+        <h1 class="panel-title">Asymmetric Encryption</h1>
+        <p class="panel-desc">Encrypt with a public key, decrypt only with the matching private key. Generate a pair on the Key Generation page first.</p>
+      </div>
+      <div class="card">
+        <div class="info-toggle" onclick="toggleInfo(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 6 6 6-6 6"/></svg>How this works</div>
+        <div class="info-box">RSA-OAEP is limited to small payloads (well under the key size) — it's meant for wrapping a symmetric key, not encrypting large documents directly. For bulk data, encrypt with AES-GCM and use RSA only to protect the AES key.</div>
+        <div class="field">
+          <label class="field-label">Plaintext / ciphertext</label>
+          <textarea class="input" id="asym-input" rows="4" placeholder="Short text to encrypt, or base64 ciphertext to decrypt"></textarea>
+        </div>
+        <div class="field">
+          <label class="field-label">Key (PEM)</label>
+          <textarea class="input" id="asym-key" rows="4" placeholder="Paste a PUBLIC KEY to encrypt, or a PRIVATE KEY to decrypt"></textarea>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="asymEncrypt()">Encrypt</button>
+          <button class="btn btn-ghost" onclick="asymDecrypt()">Decrypt</button>
+        </div>
+        <div class="field" style="margin-top:1.1rem">
+          <label class="field-label">Result</label>
+          <textarea class="input output-field" id="asym-output" readonly rows="4" placeholder="Output appears here"></textarea>
+        </div>
+        <div class="status" id="asym-status"></div>
+      </div>
+    </section>
+
+    <!-- FILE TOOLS -->
+    <section id="files" class="panel">
+      <div class="panel-head">
+        <span class="panel-eyebrow">Local files</span>
+        <h1 class="panel-title">File Tools</h1>
+        <p class="panel-desc">Hash a file or encrypt it with AES-GCM. The file is read and processed in memory — it's never uploaded anywhere.</p>
+      </div>
+      <div class="card">
+        <div class="field">
+          <label class="field-label">File</label>
+          <input class="input" type="file" id="file-input">
+          <div class="field-hint" id="file-meta"></div>
+        </div>
+        <div class="field">
+          <label class="field-label">Operation</label>
+          <select class="input" id="file-op" onchange="onFileOpChange()">
+            <option value="hash">SHA-256 hash</option>
+            <option value="encrypt">AES-GCM encrypt</option>
+            <option value="decrypt">AES-GCM decrypt</option>
+          </select>
+        </div>
+        <div class="field" id="file-key-field" style="display:none">
+          <label class="field-label">Key <span class="tag" style="background:var(--accent-soft);color:var(--accent-deep)">base64, 32 bytes</span></label>
+          <input class="input" id="file-key" placeholder="Leave blank on encrypt to generate one">
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="runFileOp()">Run</button>
+          <button class="btn btn-ghost" id="file-download" style="display:none" onclick="downloadFileResult()">Download result</button>
+        </div>
+        <div class="field" style="margin-top:1.1rem">
+          <label class="field-label">Result</label>
+          <textarea class="input output-field" id="file-output" readonly rows="4" placeholder="Result appears here"></textarea>
+        </div>
+        <div class="status" id="file-status"></div>
+      </div>
+    </section>
+
+    <!-- HASHING -->
+    <section id="hashing" class="panel">
+      <div class="panel-head">
+        <span class="panel-eyebrow">Digests</span>
+        <h1 class="panel-title">Hashing</h1>
+        <p class="panel-desc">Turn data into a fixed-size fingerprint. Use SHA-256 or SHA-512 for integrity checks; avoid MD5 and SHA-1 outside legacy compatibility.</p>
+      </div>
+      <div class="card">
+        <div class="field">
+          <label class="field-label">Text to hash</label>
+          <textarea class="input" id="hash-input" rows="5" placeholder="Enter text"></textarea>
+        </div>
+        <div class="field">
+          <label class="field-label">Algorithm</label>
+          <select class="input" id="hash-algo">
+            <option value="SHA-256">SHA-256</option>
+            <option value="SHA-512">SHA-512</option>
+            <option value="BLAKE2b">BLAKE2b-256</option>
+            <option value="SHA-1">SHA-1 — legacy</option>
+            <option value="MD5">MD5 — legacy, insecure</option>
+          </select>
+        </div>
+        <div class="btn-row"><button class="btn btn-primary" onclick="runHash()">Generate hash</button></div>
+        <div class="field" style="margin-top:1.1rem">
+          <label class="field-label">Digest</label>
+          <textarea class="input output-field" id="hash-output" readonly rows="3"></textarea>
+        </div>
+        <div class="status" id="hash-status"></div>
+      </div>
+    </section>
+
+    <!-- HMAC -->
+    <section id="hmac" class="panel">
+      <div class="panel-head">
+        <span class="panel-eyebrow">Message authentication</span>
+        <h1 class="panel-title">HMAC</h1>
+        <p class="panel-desc">Proves both integrity and authenticity — only someone holding the key could have produced this tag.</p>
+      </div>
+      <div class="card">
+        <div class="field"><label class="field-label">Text</label><textarea class="input" id="hmac-input" rows="4"></textarea></div>
+        <div class="card-row">
+          <div class="field"><label class="field-label">Key (text)</label><input class="input" id="hmac-key"></div>
+          <div class="field"><label class="field-label">Algorithm</label>
+            <select class="input" id="hmac-algo"><option value="SHA-256">HMAC-SHA-256</option><option value="SHA-512">HMAC-SHA-512</option></select>
+          </div>
+        </div>
+        <div class="btn-row"><button class="btn btn-primary" onclick="runHmac()">Generate HMAC</button></div>
+        <div class="field" style="margin-top:1.1rem"><label class="field-label">Result</label><textarea class="input output-field" id="hmac-output" readonly rows="3"></textarea></div>
+        <div class="status" id="hmac-status"></div>
+      </div>
+    </section>
+
+    <!-- SIGNATURE -->
+    <section id="signature" class="panel">
+      <div class="panel-head">
+        <span class="panel-eyebrow">RSA-PSS · WebCrypto</span>
+        <h1 class="panel-title">Digital Signature</h1>
+        <p class="panel-desc">Sign with a private key; anyone with the public key can verify the signature came from you and the message wasn't altered.</p>
+      </div>
+      <div class="card">
+        <div class="field"><label class="field-label">Message</label><textarea class="input" id="sig-input" rows="4"></textarea></div>
+        <div class="field"><label class="field-label">Key (PEM)</label><textarea class="input" id="sig-key" rows="4" placeholder="Private key to sign, public key to verify"></textarea></div>
+        <div class="field"><label class="field-label">Signature (base64, for verify)</label><input class="input" id="sig-value"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="runSign()">Sign</button>
+          <button class="btn btn-ghost" onclick="runVerify()">Verify</button>
+        </div>
+        <div class="field" style="margin-top:1.1rem"><label class="field-label">Result</label><textarea class="input output-field" id="sig-output" readonly rows="3"></textarea></div>
+        <div class="status" id="sig-status"></div>
+      </div>
+    </section>
+
+    <!-- COMPARE -->
+    <section id="compare" class="panel">
+      <div class="panel-head">
+        <span class="panel-eyebrow">Verification</span>
+        <h1 class="panel-title">Compare Values</h1>
+        <p class="panel-desc">Paste two hashes, HMACs, or signatures to confirm they match exactly — a manual step people skip and shouldn't.</p>
+      </div>
+      <div class="card">
+        <div class="card-row">
+          <div class="field"><label class="field-label">Value A</label><textarea class="input" id="cmp-a" rows="3"></textarea></div>
+          <div class="field"><label class="field-label">Value B</label><textarea class="input" id="cmp-b" rows="3"></textarea></div>
+        </div>
+        <label style="display:flex;align-items:center;gap:.5rem;font-size:.82rem;color:var(--ink-soft);margin-bottom:.5rem"><input type="checkbox" id="cmp-trim" checked> Ignore leading/trailing whitespace and case</label>
+        <div class="btn-row"><button class="btn btn-primary" onclick="runCompare()">Compare</button></div>
+        <div class="compare-result" id="cmp-result"></div>
+      </div>
+    </section>
+
+    <!-- KEYGEN -->
+    <section id="keygen" class="panel">
+      <div class="panel-head">
+        <span class="panel-eyebrow">Key material</span>
+        <h1 class="panel-title">Key Generation</h1>
+        <p class="panel-desc">Generate real, exportable keys for the tools above — AES for symmetric work, RSA for encryption and signatures.</p>
+      </div>
+      <div class="card">
+        <div class="field">
+          <label class="field-label">Key type</label>
+          <select class="input" id="keygen-type" onchange="onKeygenTypeChange()">
+            <option value="aes">AES-GCM 256 (symmetric)</option>
+            <option value="rsa-oaep">RSA-OAEP 2048 (encryption pair)</option>
+            <option value="rsa-oaep-4096">RSA-OAEP 4096 (encryption pair)</option>
+            <option value="rsa-pss">RSA-PSS 2048 (signature pair)</option>
+          </select>
+        </div>
+        <div class="btn-row"><button class="btn btn-primary" onclick="runKeygen()">Generate</button></div>
+        <div class="field" style="margin-top:1.1rem"><label class="field-label">Result</label><textarea class="input output-field" id="keygen-output" readonly rows="8"></textarea></div>
+        <div class="status" id="keygen-status"></div>
+      </div>
+    </section>
+
+    <!-- PBKDF2 / ARGON2 -->
+    <section id="pbkdf2" class="panel">
+      <div class="panel-head">
+        <span class="panel-eyebrow">Key derivation</span>
+        <h1 class="panel-title">PBKDF2 &amp; Argon2id</h1>
+        <p class="panel-desc">Turn a password into a key or storable hash, slowly and deliberately, so brute-forcing it is expensive. Argon2id is the current recommended default; PBKDF2 remains widely supported.</p>
+      </div>
+      <div class="card">
+        <div class="field"><label class="field-label">Password</label><input class="input" id="kdf-password" type="text"></div>
+        <div class="card-row">
+          <div class="field"><label class="field-label">Salt (base64, optional)</label><input class="input" id="kdf-salt" placeholder="Leave blank to generate"></div>
+          <div class="field"><label class="field-label">Method</label>
+            <select class="input" id="kdf-method"><option value="pbkdf2">PBKDF2-SHA256 (100k iterations)</option><option value="argon2id">Argon2id</option></select>
+          </div>
+        </div>
+        <div class="btn-row"><button class="btn btn-primary" onclick="runKdf()">Derive</button></div>
+        <div class="field" style="margin-top:1.1rem"><label class="field-label">Result</label><textarea class="input output-field" id="kdf-output" readonly rows="4"></textarea></div>
+        <div class="status" id="kdf-status"></div>
+      </div>
+    </section>
+
+    <!-- ECDH -->
+    <section id="dh" class="panel">
+      <div class="panel-head">
+        <span class="panel-eyebrow">ECDH · WebCrypto</span>
+        <h1 class="panel-title">Key Exchange</h1>
+        <p class="panel-desc">Simulates two parties (A and B) deriving the same shared secret over an insecure channel using elliptic-curve Diffie–Hellman — each generates a keypair, exchanges public keys, and independently arrives at an identical secret.</p>
+      </div>
+      <div class="card">
+        <div class="btn-row"><button class="btn btn-primary" onclick="runEcdh()">Run exchange (P-256)</button></div>
+        <div class="field" style="margin-top:1.1rem"><label class="field-label">Result</label><textarea class="input output-field" id="dh-output" readonly rows="8"></textarea></div>
+        <div class="status" id="dh-status"></div>
+      </div>
+    </section>
+
+    <!-- JWT -->
+    <section id="jwt" class="panel">
+      <div class="panel-head">
+        <span class="panel-eyebrow">Tokens</span>
+        <h1 class="panel-title">JWT Tool</h1>
+        <p class="panel-desc">Decode, verify, or issue JSON Web Tokens signed with HMAC (HS256) or RSA (RS256).</p>
+      </div>
+      <div class="card">
+        <div class="field"><label class="field-label">Token</label><textarea class="input" id="jwt-token" rows="4" placeholder="Paste a token to decode/verify, or leave blank to encode a new one"></textarea></div>
+        <div class="card-row">
+          <div class="field"><label class="field-label">Header (JSON)</label><textarea class="input" id="jwt-header" rows="3">{"alg":"HS256","typ":"JWT"}</textarea></div>
+          <div class="field"><label class="field-label">Payload (JSON)</label><textarea class="input" id="jwt-payload" rows="3">{"sub":"1234","name":"Ada"}</textarea></div>
+        </div>
+        <div class="card-row">
+          <div class="field"><label class="field-label">Algorithm</label>
+            <select class="input" id="jwt-alg"><option value="HS256">HS256</option><option value="RS256">RS256</option></select>
+          </div>
+          <div class="field"><label class="field-label">Secret (HS256) or Key (RS256, PEM)</label><textarea class="input" id="jwt-secret" rows="1" placeholder="HS256 secret text, or RSA PEM key"></textarea></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="jwtEncode()">Encode &amp; sign</button>
+          <button class="btn btn-ghost" onclick="jwtDecode()">Decode (no verify)</button>
+          <button class="btn btn-ghost" onclick="jwtVerify()">Verify signature</button>
+        </div>
+        <div class="field" style="margin-top:1.1rem"><label class="field-label">Result</label><textarea class="input output-field" id="jwt-output" readonly rows="6"></textarea></div>
+        <div class="status" id="jwt-status"></div>
+      </div>
+    </section>
+
+    <!-- ENCODING -->
+    <section id="encoding" class="panel">
+      <div class="panel-head">
+        <span class="panel-eyebrow">Transport formats</span>
+        <h1 class="panel-title">Encoding</h1>
+        <p class="panel-desc">Convert text to and from Base64 or hexadecimal — encoding, not encryption; anyone can reverse it.</p>
+      </div>
+      <div class="card">
+        <div class="field"><label class="field-label">Input</label><textarea class="input" id="enc-input" rows="5"></textarea></div>
+        <div class="field"><label class="field-label">Operation</label>
+          <select class="input" id="enc-type"><option value="base64-encode">Base64 encode</option><option value="base64-decode">Base64 decode</option><option value="hex-encode">Hex encode</option><option value="hex-decode">Hex decode</option></select>
+        </div>
+        <div class="btn-row"><button class="btn btn-primary" onclick="runEncode()">Process</button></div>
+        <div class="field" style="margin-top:1.1rem"><label class="field-label">Result</label><textarea class="input output-field" id="enc-output" readonly rows="5"></textarea></div>
+        <div class="status" id="enc-status"></div>
+      </div>
+    </section>
+
+    <!-- UTILS -->
+    <section id="utils" class="panel">
+      <div class="panel-head">
+        <span class="panel-eyebrow">Passwords</span>
+        <h1 class="panel-title">Password &amp; Entropy</h1>
+        <p class="panel-desc">Generate a strong random password, or check how much entropy an existing string carries.</p>
+      </div>
+      <div class="card-row">
+        <div class="card">
+          <div class="field"><label class="field-label">Length</label><input class="input" type="number" id="pw-length" value="20" min="4" max="128"></div>
+          <div class="btn-row"><button class="btn btn-primary" onclick="genPassword()">Generate password</button></div>
+          <div class="field" style="margin-top:1.1rem"><label class="field-label">Result</label><input class="input output-field" id="pw-output" readonly></div>
+          <div class="meter"><div class="meter-fill" id="pw-meter"></div></div>
+          <div class="field-hint" id="pw-meter-label">&nbsp;</div>
+        </div>
+        <div class="card">
+          <div class="field"><label class="field-label">Text to analyze</label><textarea class="input" id="ent-input" rows="4"></textarea></div>
+          <div class="btn-row"><button class="btn btn-primary" onclick="analyzeEntropy()">Analyze entropy</button></div>
+          <div class="field" style="margin-top:1.1rem"><label class="field-label">Result</label><textarea class="input output-field" id="ent-output" readonly rows="3"></textarea></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HISTORY -->
+    <section id="history" class="panel">
+      <div class="panel-head">
+        <span class="panel-eyebrow">This session</span>
+        <h1 class="panel-title">History</h1>
+        <p class="panel-desc">Operations you've run in this tab. Nothing here is saved once you close or reload the page. Click an entry to reload it into its tool.</p>
+      </div>
+      <div class="card" id="history-list"><div class="history-empty">No operations yet — run a tool and it'll show up here.</div></div>
+    </section>
+
+    <div class="footer">
+      <span>Cryptell — client-side cryptography workbench</span>
+      <span>All processing happens in your browser</span>
+    </div>
+  </div>
+</main>
+
+<!-- Command palette -->
+<div class="cmdk-overlay" id="cmdk" onclick="if(event.target===this)closePalette()">
+  <div class="cmdk-box">
+    <input class="cmdk-input" id="cmdk-input" placeholder="Jump to a tool…" oninput="filterPalette()">
+    <div class="cmdk-list" id="cmdk-list"></div>
+  </div>
+</div>
+
+<!-- About / Credits modal -->
+<div class="modal-overlay" id="modal-about" onclick="if(event.target===this)closeModal('about')">
+  <div class="modal">
+    <h2>Cryptell</h2>
+    <p>A client-side cryptography workbench: real WebCrypto-backed encryption, hashing, signatures, key exchange, and token tools — nothing leaves your browser.</p>
+    <ul class="modal-features">
+      <li>AES-GCM encryption</li><li>RSA-OAEP &amp; RSA-PSS</li>
+      <li>ECDH key exchange</li><li>JWT encode / verify</li>
+      <li>PBKDF2 &amp; Argon2id</li><li>File hashing &amp; encryption</li>
+      <li>SHA-256/512, BLAKE2b</li><li>Session history</li>
+    </ul>
+    <div class="credit-card">
+      <img class="credit-avatar" src="https://avatars.githubusercontent.com/u/189277555?v=4" alt="Sisco Ask">
+      <div>
+        <div class="credit-name">Built by Sisco Ask</div>
+        <div class="credit-role">Aspiring Cloud Security Engineer</div>
+        <div class="credit-links">
+          <a href="https://github.com/siscoask" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://siscoask.vercel.app" target="_blank" rel="noopener">Portfolio</a>
+          <a href="https://www.linkedin.com/in/siscoask/" target="_blank" rel="noopener">LinkedIn</a>
+          <a href="https://x.com/SiscoAsk" target="_blank" rel="noopener">X</a>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row" style="margin-top:1.4rem"><button class="btn btn-ghost" onclick="closeModal('about')">Close</button></div>
+  </div>
+</div>
+
+<script>
+/* ---------------- State ---------------- */
+const state = { theme:'light', paletteItems:[], paletteSelected:0, history:[] };
+
+const TOOLS = [
+  {id:'symmetric', label:'Symmetric Encryption (AES-GCM)'},
+  {id:'asymmetric', label:'Asymmetric Encryption (RSA-OAEP)'},
+  {id:'files', label:'File Tools'},
+  {id:'hashing', label:'Hashing'},
+  {id:'hmac', label:'HMAC'},
+  {id:'signature', label:'Digital Signature (RSA-PSS)'},
+  {id:'compare', label:'Compare Values'},
+  {id:'keygen', label:'Key Generation'},
+  {id:'pbkdf2', label:'PBKDF2 & Argon2id'},
+  {id:'dh', label:'Key Exchange (ECDH)'},
+  {id:'jwt', label:'JWT Tool'},
+  {id:'encoding', label:'Encoding'},
+  {id:'utils', label:'Password & Entropy'},
+  {id:'history', label:'History'},
+];
+
+/* ---------------- Utility ---------------- */
+const enc = new TextEncoder(); const dec = new TextDecoder();
+function b64(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))); }
+function unb64(str){ const bin=atob(str); const b=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++)b[i]=bin.charCodeAt(i); return b.buffer; }
+function b64url(buf){ return b64(buf).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+function unb64url(str){ str=str.replace(/-/g,'+').replace(/_/g,'/'); while(str.length%4)str+='='; return unb64(str); }
+function toHex(buf){ return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join(''); }
+function fromHex(str){ const b=new Uint8Array(str.match(/.{1,2}/g).map(h=>parseInt(h,16))); return b.buffer; }
+function pemToDer(pem){ const b64s = pem.replace(/-----[^-]+-----/g,'').replace(/\s+/g,''); return unb64(b64s); }
+function derToPem(der, label){ const b=b64(der).match(/.{1,64}/g).join('\n'); return `-----BEGIN ${label}-----\n${b}\n-----END ${label}-----`; }
+
+function showStatus(id, msg, type='success'){
+  const el = document.getElementById(id);
+  el.textContent = msg; el.className = `status status-${type} show`;
+  clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove('show'), 6000);
 }
+
+function scrambleInto(el, finalText){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches || finalText.length>4000){
+    el.value = finalText; return;
+  }
+  const chars = 'ABCDEF0123456789abcdef+/=';
+  el.classList.add('scrambling');
+  let frame = 0; const totalFrames = 10;
+  const len = finalText.length;
+  const iv = setInterval(()=>{
+    frame++;
+    if(frame>=totalFrames){ el.value = finalText; el.classList.remove('scrambling'); clearInterval(iv); return; }
+    const revealCount = Math.floor(len*(frame/totalFrames));
+    let out='';
+    for(let i=0;i<len;i++){
+      if(i<revealCount) out+=finalText[i];
+      else out += finalText[i]==='\n' ? '\n' : chars[Math.floor(Math.random()*chars.length)];
+    }
+    el.value = out;
+  }, 22);
+}
+
+function addHistory(tool, summary, restoreFn){
+  state.history.unshift({ tool, summary: summary.slice(0,80), time: new Date().toLocaleTimeString(), restore: restoreFn });
+  if(state.history.length>40) state.history.pop();
+  renderHistory();
+}
+
+function renderHistory(){
+  const box = document.getElementById('history-list');
+  if(!state.history.length){ box.innerHTML = '<div class="history-empty">No operations yet — run a tool and it\'ll show up here.</div>'; return; }
+  box.innerHTML = '';
+  state.history.forEach((h,idx)=>{
+    const item = document.createElement('div');
+    item.className = 'history-item';
+    item.innerHTML = `<div class="history-main"><div class="history-tool">${h.tool}</div><div class="history-summary">${h.summary.replace(/</g,'&lt;')}</div></div><div class="history-time">${h.time}</div>`;
+    item.onclick = ()=>{ if(h.restore) h.restore(); };
+    box.appendChild(item);
+  });
+}
+
+/* ---------------- Nav / panels ---------------- */
+function showPanel(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const nav = document.querySelector(`.nav-item[data-panel="${id}"]`);
+  if(nav) nav.classList.add('active');
+  if(window.innerWidth<=900) closeSidebar();
+  window.scrollTo({top:0, behavior:'instant' in window ? 'instant':'auto'});
+}
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('scrim').classList.toggle('show');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('scrim').classList.remove('show');
+}
+function toggleInfo(el){ el.classList.toggle('open'); el.nextElementSibling.classList.toggle('open'); }
+
+/* ---------------- Theme ---------------- */
+function setTheme(t){
+  state.theme = t;
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('themeBtn').innerHTML = t==='dark'
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+}
+function toggleTheme(){ setTheme(state.theme==='dark'?'light':'dark'); }
+
+/* ---------------- Command palette ---------------- */
+function openPalette(){
+  document.getElementById('cmdk').classList.add('open');
+  document.getElementById('cmdk-input').value='';
+  document.getElementById('cmdk-input').focus();
+  state.paletteSelected = 0;
+  renderPalette(TOOLS);
+}
+function closePalette(){ document.getElementById('cmdk').classList.remove('open'); }
+function renderPalette(items){
+  state.paletteItems = items;
+  const list = document.getElementById('cmdk-list');
+  list.innerHTML = '';
+  items.forEach((t,i)=>{
+    const d = document.createElement('div');
+    d.className = 'cmdk-item' + (i===state.paletteSelected?' selected':'');
+    d.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>${t.label}`;
+    d.onclick = ()=>{ showPanel(t.id); closePalette(); };
+    list.appendChild(d);
+  });
+}
+function filterPalette(){
+  const q = document.getElementById('cmdk-input').value.toLowerCase();
+  state.paletteSelected = 0;
+  renderPalette(TOOLS.filter(t=>t.label.toLowerCase().includes(q)));
+}
+document.addEventListener('keydown', (e)=>{
+  if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); openPalette(); }
+  if(e.key==='Escape'){ closePalette(); closeModal('about'); }
+  if(document.getElementById('cmdk').classList.contains('open')){
+    if(e.key==='ArrowDown'){ e.preventDefault(); state.paletteSelected=Math.min(state.paletteSelected+1,state.paletteItems.length-1); renderPalette(state.paletteItems); }
+    if(e.key==='ArrowUp'){ e.preventDefault(); state.paletteSelected=Math.max(state.paletteSelected-1,0); renderPalette(state.paletteItems); }
+    if(e.key==='Enter' && state.paletteItems[state.paletteSelected]){ showPanel(state.paletteItems[state.paletteSelected].id); closePalette(); }
+  }
 });
-// Initialize tooltips
-document.querySelectorAll('[data-tooltip]').forEach(element => {
-element.addEventListener('mouseenter', () => {
-// Tooltip is handled by CSS
+
+/* ---------------- Modal ---------------- */
+function openModal(name){ document.getElementById('modal-'+name).classList.add('open'); }
+function closeModal(name){ document.getElementById('modal-'+name).classList.remove('open'); }
+
+/* ================= SYMMETRIC ================= */
+async function symEncrypt(){
+  const input = document.getElementById('sym-input').value;
+  const keyStr = document.getElementById('sym-key').value.trim();
+  if(!input){ showStatus('sym-status','Enter text to encrypt.', 'error'); return; }
+  try{
+    let key;
+    if(keyStr){ key = await crypto.subtle.importKey('raw', unb64(keyStr), {name:'AES-GCM'}, true, ['encrypt']); }
+    else{
+      key = await crypto.subtle.generateKey({name:'AES-GCM', length:256}, true, ['encrypt','decrypt']);
+      document.getElementById('sym-key').value = b64(await crypto.subtle.exportKey('raw', key));
+    }
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, enc.encode(input));
+    const combined = new Uint8Array([...iv, ...new Uint8Array(ct)]);
+    const result = b64(combined);
+    scrambleInto(document.getElementById('sym-output'), result);
+    showStatus('sym-status','Encrypted successfully.');
+    addHistory('AES-GCM encrypt', result, ()=>{ showPanel('symmetric'); document.getElementById('sym-output').value=result; });
+  }catch(e){ showStatus('sym-status', `Error: ${e.message}`, 'error'); }
+}
+async function symDecrypt(){
+  const input = document.getElementById('sym-input').value.trim();
+  const keyStr = document.getElementById('sym-key').value.trim();
+  if(!input||!keyStr){ showStatus('sym-status','Provide both ciphertext and key.', 'error'); return; }
+  try{
+    const key = await crypto.subtle.importKey('raw', unb64(keyStr), {name:'AES-GCM'}, false, ['decrypt']);
+    const combined = new Uint8Array(unb64(input));
+    if(combined.length<13) throw new Error('Ciphertext too short — missing IV.');
+    const iv = combined.slice(0,12); const ct = combined.slice(12);
+    const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv}, key, ct);
+    const result = dec.decode(pt);
+    scrambleInto(document.getElementById('sym-output'), result);
+    showStatus('sym-status','Decrypted successfully.');
+    addHistory('AES-GCM decrypt', result, ()=>{ showPanel('symmetric'); document.getElementById('sym-output').value=result; });
+  }catch(e){ showStatus('sym-status', `Error: ${e.message}. Check the key and ciphertext are correct.`, 'error'); }
+}
+
+/* ================= ASYMMETRIC (RSA-OAEP) ================= */
+async function asymEncrypt(){
+  const input = document.getElementById('asym-input').value;
+  const pem = document.getElementById('asym-key').value.trim();
+  if(!input||!pem){ showStatus('asym-status','Provide text and a public key.', 'error'); return; }
+  try{
+    if(!pem.includes('PUBLIC KEY')) throw new Error('Expected a PUBLIC KEY (PEM) for encryption.');
+    const key = await crypto.subtle.importKey('spki', pemToDer(pem), {name:'RSA-OAEP', hash:'SHA-256'}, false, ['encrypt']);
+    const ct = await crypto.subtle.encrypt({name:'RSA-OAEP'}, key, enc.encode(input));
+    const result = b64(ct);
+    scrambleInto(document.getElementById('asym-output'), result);
+    showStatus('asym-status','Encrypted successfully.');
+    addHistory('RSA-OAEP encrypt', result, ()=>{ showPanel('asymmetric'); document.getElementById('asym-output').value=result; });
+  }catch(e){ showStatus('asym-status', `Error: ${e.message}`, 'error'); }
+}
+async function asymDecrypt(){
+  const input = document.getElementById('asym-input').value.trim();
+  const pem = document.getElementById('asym-key').value.trim();
+  if(!input||!pem){ showStatus('asym-status','Provide ciphertext and a private key.', 'error'); return; }
+  try{
+    if(!pem.includes('PRIVATE KEY')) throw new Error('Expected a PRIVATE KEY (PEM) for decryption.');
+    const key = await crypto.subtle.importKey('pkcs8', pemToDer(pem), {name:'RSA-OAEP', hash:'SHA-256'}, false, ['decrypt']);
+    const pt = await crypto.subtle.decrypt({name:'RSA-OAEP'}, key, unb64(input));
+    const result = dec.decode(pt);
+    scrambleInto(document.getElementById('asym-output'), result);
+    showStatus('asym-status','Decrypted successfully.');
+    addHistory('RSA-OAEP decrypt', result, ()=>{ showPanel('asymmetric'); document.getElementById('asym-output').value=result; });
+  }catch(e){ showStatus('asym-status', `Error: ${e.message}`, 'error'); }
+}
+
+/* ================= FILE TOOLS ================= */
+let fileBuffer = null; let fileResultBlob = null; let fileResultName = '';
+document.getElementById('file-input').addEventListener('change', async (e)=>{
+  const f = e.target.files[0];
+  if(!f){ fileBuffer=null; document.getElementById('file-meta').textContent=''; return; }
+  fileBuffer = await f.arrayBuffer();
+  document.getElementById('file-meta').textContent = `${f.name} — ${(f.size/1024).toFixed(1)} KB`;
 });
-});
-// Ensure only one panel is active on load
-showPanel(AppState.activePanel);
+function onFileOpChange(){
+  const op = document.getElementById('file-op').value;
+  document.getElementById('file-key-field').style.display = op==='hash' ? 'none' : 'block';
+}
+async function runFileOp(){
+  const op = document.getElementById('file-op').value;
+  const out = document.getElementById('file-output');
+  document.getElementById('file-download').style.display='none';
+  if(!fileBuffer){ showStatus('file-status','Choose a file first.', 'error'); return; }
+  try{
+    if(op==='hash'){
+      const digest = await crypto.subtle.digest('SHA-256', fileBuffer);
+      out.value = toHex(digest);
+      showStatus('file-status','Hashed successfully.');
+      addHistory('File SHA-256', out.value);
+    } else if(op==='encrypt'){
+      let keyStr = document.getElementById('file-key').value.trim();
+      let key;
+      if(keyStr){ key = await crypto.subtle.importKey('raw', unb64(keyStr), {name:'AES-GCM'}, true, ['encrypt']); }
+      else{ key = await crypto.subtle.generateKey({name:'AES-GCM', length:256}, true, ['encrypt','decrypt']);
+        document.getElementById('file-key').value = b64(await crypto.subtle.exportKey('raw', key)); }
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const ct = await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, fileBuffer);
+      const combined = new Uint8Array([...iv, ...new Uint8Array(ct)]);
+      fileResultBlob = new Blob([combined]); fileResultName = 'encrypted.bin';
+      out.value = `Encrypted — ${combined.length} bytes. Key saved above. Click "Download result" to save the file.`;
+      document.getElementById('file-download').style.display='inline-flex';
+      showStatus('file-status','Encrypted successfully.');
+      addHistory('File encrypt', fileResultName);
+    } else if(op==='decrypt'){
+      const keyStr = document.getElementById('file-key').value.trim();
+      if(!keyStr) throw new Error('Provide the key used to encrypt this file.');
+      const key = await crypto.subtle.importKey('raw', unb64(keyStr), {name:'AES-GCM'}, false, ['decrypt']);
+      const bytes = new Uint8Array(fileBuffer);
+      const iv = bytes.slice(0,12); const ct = bytes.slice(12);
+      const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv}, key, ct);
+      fileResultBlob = new Blob([pt]); fileResultName = 'decrypted.bin';
+      out.value = `Decrypted — ${pt.byteLength} bytes. Click "Download result" to save the file.`;
+      document.getElementById('file-download').style.display='inline-flex';
+      showStatus('file-status','Decrypted successfully.');
+      addHistory('File decrypt', fileResultName);
+    }
+  }catch(e){ showStatus('file-status', `Error: ${e.message}`, 'error'); }
+}
+function downloadFileResult(){
+  if(!fileResultBlob) return;
+  const url = URL.createObjectURL(fileResultBlob);
+  const a = document.createElement('a'); a.href=url; a.download=fileResultName; a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ================= HASHING ================= */
+async function runHash(){
+  const input = document.getElementById('hash-input').value;
+  const algo = document.getElementById('hash-algo').value;
+  if(!input){ showStatus('hash-status','Enter text to hash.', 'error'); return; }
+  try{
+    let result;
+    if(algo==='MD5'){ result = await hashwasm.md5(input); }
+    else if(algo==='BLAKE2b'){ result = await hashwasm.blake2b(input, 256); }
+    else{ result = toHex(await crypto.subtle.digest(algo, enc.encode(input))); }
+    scrambleInto(document.getElementById('hash-output'), result);
+    showStatus('hash-status', (algo==='MD5'||algo==='SHA-1') ? 'Generated — remember this algorithm is not collision-resistant.' : 'Hash generated.', (algo==='MD5'||algo==='SHA-1')?'info':'success');
+    addHistory(`${algo} hash`, result, ()=>{ showPanel('hashing'); document.getElementById('hash-input').value=input; document.getElementById('hash-algo').value=algo; document.getElementById('hash-output').value=result; });
+  }catch(e){ showStatus('hash-status', `Error: ${e.message}`, 'error'); }
+}
+
+/* ================= HMAC ================= */
+async function runHmac(){
+  const input = document.getElementById('hmac-input').value;
+  const key = document.getElementById('hmac-key').value;
+  const algo = document.getElementById('hmac-algo').value;
+  if(!input||!key){ showStatus('hmac-status','Provide both text and a key.', 'error'); return; }
+  try{
+    const cryptoKey = await crypto.subtle.importKey('raw', enc.encode(key), {name:'HMAC', hash:algo}, false, ['sign']);
+    const sig = await crypto.subtle.sign('HMAC', cryptoKey, enc.encode(input));
+    const result = toHex(sig);
+    scrambleInto(document.getElementById('hmac-output'), result);
+    showStatus('hmac-status','HMAC generated.');
+    addHistory(`HMAC-${algo}`, result, ()=>{ showPanel('hmac'); document.getElementById('hmac-output').value=result; });
+  }catch(e){ showStatus('hmac-status', `Error: ${e.message}`, 'error'); }
+}
+
+/* ================= SIGNATURE (RSA-PSS) ================= */
+async function runSign(){
+  const input = document.getElementById('sig-input').value;
+  const pem = document.getElementById('sig-key').value.trim();
+  if(!input||!pem){ showStatus('sig-status','Provide a message and a private key.', 'error'); return; }
+  try{
+    if(!pem.includes('PRIVATE KEY')) throw new Error('Expected a PRIVATE KEY (PEM) to sign.');
+    const key = await crypto.subtle.importKey('pkcs8', pemToDer(pem), {name:'RSA-PSS', hash:'SHA-256'}, false, ['sign']);
+    const sig = await crypto.subtle.sign({name:'RSA-PSS', saltLength:32}, key, enc.encode(input));
+    const result = b64(sig);
+    scrambleInto(document.getElementById('sig-output'), result);
+    document.getElementById('sig-value').value = result;
+    showStatus('sig-status','Signed successfully.');
+    addHistory('RSA-PSS sign', result);
+  }catch(e){ showStatus('sig-status', `Error: ${e.message}`, 'error'); }
+}
+async function runVerify(){
+  const input = document.getElementById('sig-input').value;
+  const pem = document.getElementById('sig-key').value.trim();
+  const sigVal = document.getElementById('sig-value').value.trim();
+  if(!input||!pem||!sigVal){ showStatus('sig-status','Provide message, public key, and signature.', 'error'); return; }
+  try{
+    if(!pem.includes('PUBLIC KEY')) throw new Error('Expected a PUBLIC KEY (PEM) to verify.');
+    const key = await crypto.subtle.importKey('spki', pemToDer(pem), {name:'RSA-PSS', hash:'SHA-256'}, false, ['verify']);
+    const ok = await crypto.subtle.verify({name:'RSA-PSS', saltLength:32}, key, unb64(sigVal), enc.encode(input));
+    document.getElementById('sig-output').value = ok ? 'Signature is VALID.' : 'Signature is INVALID.';
+    showStatus('sig-status', ok?'Verified — signature matches.':'Signature does not match.', ok?'success':'error');
+    addHistory('RSA-PSS verify', ok?'valid':'invalid');
+  }catch(e){ showStatus('sig-status', `Error: ${e.message}`, 'error'); }
+}
+
+/* ================= COMPARE ================= */
+function runCompare(){
+  let a = document.getElementById('cmp-a').value;
+  let b = document.getElementById('cmp-b').value;
+  if(document.getElementById('cmp-trim').checked){ a=a.trim().toLowerCase(); b=b.trim().toLowerCase(); }
+  const result = document.getElementById('cmp-result');
+  const match = a.length>0 && a===b;
+  result.textContent = match ? '✓ Values match' : '✕ Values do not match';
+  result.className = 'compare-result show ' + (match?'compare-match':'compare-mismatch');
+  addHistory('Compare', match?'match':'mismatch');
+}
+
+/* ================= KEYGEN ================= */
+function onKeygenTypeChange(){}
+async function runKeygen(){
+  const type = document.getElementById('keygen-type').value;
+  const out = document.getElementById('keygen-output');
+  try{
+    if(type==='aes'){
+      const key = await crypto.subtle.generateKey({name:'AES-GCM', length:256}, true, ['encrypt','decrypt']);
+      const raw = b64(await crypto.subtle.exportKey('raw', key));
+      out.value = raw;
+      addHistory('AES key generated', raw);
+    } else {
+      const isOaep = type.startsWith('rsa-oaep');
+      const modulusLength = type==='rsa-oaep-4096' ? 4096 : 2048;
+      const pair = await crypto.subtle.generateKey(
+        { name: isOaep?'RSA-OAEP':'RSA-PSS', modulusLength, publicExponent:new Uint8Array([1,0,1]), hash:'SHA-256' },
+        true, isOaep?['encrypt','decrypt']:['sign','verify']
+      );
+      const pub = derToPem(await crypto.subtle.exportKey('spki', pair.publicKey), 'PUBLIC KEY');
+      const priv = derToPem(await crypto.subtle.exportKey('pkcs8', pair.privateKey), 'PRIVATE KEY');
+      out.value = `${pub}\n\n${priv}`;
+      addHistory(`${isOaep?'RSA-OAEP':'RSA-PSS'} keypair`, `${modulusLength}-bit pair generated`);
+    }
+    showStatus('keygen-status','Key generated.');
+  }catch(e){ showStatus('keygen-status', `Error: ${e.message}`, 'error'); }
+}
+
+/* ================= PBKDF2 / ARGON2 ================= */
+async function runKdf(){
+  const password = document.getElementById('kdf-password').value;
+  const saltStr = document.getElementById('kdf-salt').value.trim();
+  const method = document.getElementById('kdf-method').value;
+  if(!password){ showStatus('kdf-status','Enter a password.', 'error'); return; }
+  try{
+    const saltBytes = saltStr ? new Uint8Array(unb64(saltStr)) : crypto.getRandomValues(new Uint8Array(16));
+    if(!saltStr) document.getElementById('kdf-salt').value = b64(saltBytes);
+    let result;
+    if(method==='pbkdf2'){
+      const base = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
+      const bits = await crypto.subtle.deriveBits({name:'PBKDF2', salt:saltBytes, iterations:100000, hash:'SHA-256'}, base, 256);
+      result = `Key:  ${b64(bits)}\nSalt: ${b64(saltBytes)}\nIterations: 100,000`;
+    } else {
+      const hash = await hashwasm.argon2id({ password, salt: saltBytes, parallelism:1, iterations:3, memorySize:19456, hashLength:32, outputType:'hex' });
+      result = `Hash: ${hash}\nSalt: ${b64(saltBytes)}\nParams: m=19456KB t=3 p=1`;
+    }
+    document.getElementById('kdf-output').value = result;
+    showStatus('kdf-status','Key derived.');
+    addHistory(method==='pbkdf2'?'PBKDF2':'Argon2id', 'derived key');
+  }catch(e){ showStatus('kdf-status', `Error: ${e.message}`, 'error'); }
+}
+
+/* ================= ECDH ================= */
+async function runEcdh(){
+  try{
+    const alice = await crypto.subtle.generateKey({name:'ECDH', namedCurve:'P-256'}, true, ['deriveBits']);
+    const bob = await crypto.subtle.generateKey({name:'ECDH', namedCurve:'P-256'}, true, ['deriveBits']);
+    const aliceSecret = await crypto.subtle.deriveBits({name:'ECDH', public:bob.publicKey}, alice.privateKey, 256);
+    const bobSecret = await crypto.subtle.deriveBits({name:'ECDH', public:alice.publicKey}, bob.privateKey, 256);
+    const match = b64(aliceSecret)===b64(bobSecret);
+    const alicePub = derToPem(await crypto.subtle.exportKey('spki', alice.publicKey), 'PUBLIC KEY');
+    const bobPub = derToPem(await crypto.subtle.exportKey('spki', bob.publicKey), 'PUBLIC KEY');
+    document.getElementById('dh-output').value =
+`Party A public key:
+${alicePub}
+
+Party B public key:
+${bobPub}
+
+Shared secret (both sides): ${b64(aliceSecret)}
+Secrets match: ${match}`;
+    showStatus('dh-status', match?'Both parties derived the same secret.':'Secrets did not match — unexpected.', match?'success':'error');
+    addHistory('ECDH exchange', match?'secrets matched':'mismatch');
+  }catch(e){ showStatus('dh-status', `Error: ${e.message}`, 'error'); }
+}
+
+/* ================= JWT ================= */
+async function jwtEncode(){
+  try{
+    const header = JSON.parse(document.getElementById('jwt-header').value || '{}');
+    const payload = JSON.parse(document.getElementById('jwt-payload').value || '{}');
+    const alg = document.getElementById('jwt-alg').value;
+    header.alg = alg; header.typ = header.typ || 'JWT';
+    const secret = document.getElementById('jwt-secret').value;
+    const signingInput = `${b64url(enc.encode(JSON.stringify(header)))}.${b64url(enc.encode(JSON.stringify(payload)))}`;
+    let sig;
+    if(alg==='HS256'){
+      const key = await crypto.subtle.importKey('raw', enc.encode(secret), {name:'HMAC', hash:'SHA-256'}, false, ['sign']);
+      sig = await crypto.subtle.sign('HMAC', key, enc.encode(signingInput));
+    } else {
+      if(!secret.includes('PRIVATE KEY')) throw new Error('RS256 signing needs a PRIVATE KEY (PEM).');
+      const key = await crypto.subtle.importKey('pkcs8', pemToDer(secret), {name:'RSASSA-PKCS1-v1_5', hash:'SHA-256'}, false, ['sign']);
+      sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, enc.encode(signingInput));
+    }
+    const token = `${signingInput}.${b64url(sig)}`;
+    document.getElementById('jwt-token').value = token;
+    scrambleInto(document.getElementById('jwt-output'), token);
+    showStatus('jwt-status','Token signed.');
+    addHistory('JWT encode', token, ()=>{ showPanel('jwt'); document.getElementById('jwt-token').value=token; document.getElementById('jwt-output').value=token; });
+  }catch(e){ showStatus('jwt-status', `Error: ${e.message}`, 'error'); }
+}
+function jwtDecode(){
+  const token = document.getElementById('jwt-token').value.trim();
+  try{
+    const parts = token.split('.');
+    if(parts.length!==3) throw new Error('Not a valid JWT — expected 3 dot-separated parts.');
+    const header = dec.decode(unb64url(parts[0]));
+    const payload = dec.decode(unb64url(parts[1]));
+    const result = `Header:\n${JSON.stringify(JSON.parse(header),null,2)}\n\nPayload:\n${JSON.stringify(JSON.parse(payload),null,2)}\n\n(signature not verified — use "Verify signature")`;
+    document.getElementById('jwt-output').value = result;
+    showStatus('jwt-status','Decoded — signature not checked.', 'info');
+    addHistory('JWT decode', payload);
+  }catch(e){ showStatus('jwt-status', `Error: ${e.message}`, 'error'); }
+}
+async function jwtVerify(){
+  const token = document.getElementById('jwt-token').value.trim();
+  const alg = document.getElementById('jwt-alg').value;
+  const secret = document.getElementById('jwt-secret').value;
+  try{
+    const parts = token.split('.');
+    if(parts.length!==3) throw new Error('Not a valid JWT.');
+    const signingInput = `${parts[0]}.${parts[1]}`;
+    let ok;
+    if(alg==='HS256'){
+      const key = await crypto.subtle.importKey('raw', enc.encode(secret), {name:'HMAC', hash:'SHA-256'}, false, ['verify']);
+      ok = await crypto.subtle.verify('HMAC', key, unb64url(parts[2]), enc.encode(signingInput));
+    } else {
+      if(!secret.includes('PUBLIC KEY')) throw new Error('RS256 verification needs a PUBLIC KEY (PEM).');
+      const key = await crypto.subtle.importKey('spki', pemToDer(secret), {name:'RSASSA-PKCS1-v1_5', hash:'SHA-256'}, false, ['verify']);
+      ok = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, unb64url(parts[2]), enc.encode(signingInput));
+    }
+    document.getElementById('jwt-output').value = ok ? 'Signature is VALID.' : 'Signature is INVALID.';
+    showStatus('jwt-status', ok?'Signature verified.':'Signature invalid.', ok?'success':'error');
+    addHistory('JWT verify', ok?'valid':'invalid');
+  }catch(e){ showStatus('jwt-status', `Error: ${e.message}`, 'error'); }
+}
+
+/* ================= ENCODING ================= */
+function runEncode(){
+  const input = document.getElementById('enc-input').value;
+  const type = document.getElementById('enc-type').value;
+  if(!input){ showStatus('enc-status','Enter text to process.', 'error'); return; }
+  try{
+    let result;
+    if(type==='base64-encode') result = btoa(unescape(encodeURIComponent(input)));
+    else if(type==='base64-decode') result = decodeURIComponent(escape(atob(input)));
+    else if(type==='hex-encode') result = Array.from(enc.encode(input)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    else{
+      if(!/^[0-9A-Fa-f]+$/.test(input) || input.length%2!==0) throw new Error('Not valid hex.');
+      result = dec.decode(new Uint8Array(input.match(/.{1,2}/g).map(h=>parseInt(h,16))));
+    }
+    scrambleInto(document.getElementById('enc-output'), result);
+    showStatus('enc-status','Processed successfully.');
+    addHistory(type, result, ()=>{ showPanel('encoding'); document.getElementById('enc-input').value=input; document.getElementById('enc-type').value=type; document.getElementById('enc-output').value=result; });
+  }catch(e){ showStatus('enc-status', `Error: ${e.message}`, 'error'); }
+}
+
+/* ================= UTILS ================= */
+function genPassword(){
+  const len = Math.max(4, Math.min(128, parseInt(document.getElementById('pw-length').value,10)||20));
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+';
+  const bytes = crypto.getRandomValues(new Uint8Array(len));
+  let pw=''; for(let i=0;i<len;i++) pw += chars[bytes[i]%chars.length];
+  document.getElementById('pw-output').value = pw;
+  const bitsPerChar = Math.log2(chars.length);
+  const totalBits = bitsPerChar*len;
+  const fill = document.getElementById('pw-meter');
+  const pct = Math.min(100, (totalBits/128)*100);
+  fill.style.width = pct+'%';
+  fill.style.background = totalBits<40?'var(--danger)':totalBits<70?'var(--warn)':'var(--success)';
+  document.getElementById('pw-meter-label').textContent = `${totalBits.toFixed(0)} bits of entropy`;
+  addHistory('Password generated', `${len} characters`);
+}
+function analyzeEntropy(){
+  const input = document.getElementById('ent-input').value;
+  if(!input){ showStatus('ent-status','Enter text to analyze.'); return; }
+  const freq = {};
+  for(const c of input) freq[c]=(freq[c]||0)+1;
+  let entropy=0;
+  for(const count of Object.values(freq)){ const p=count/input.length; entropy -= p*Math.log2(p); }
+  document.getElementById('ent-output').value = `Entropy: ${entropy.toFixed(3)} bits/char\nTotal: ${(entropy*input.length).toFixed(1)} bits\nUnique characters: ${Object.keys(freq).length}`;
+  addHistory('Entropy analysis', `${entropy.toFixed(2)} bits/char`);
+}
+
+/* ---------------- Init ---------------- */
+document.addEventListener('DOMContentLoaded', ()=>{
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  setTheme(prefersDark ? 'dark' : 'light');
+  showPanel('symmetric');
 });
 </script>
 </body>
